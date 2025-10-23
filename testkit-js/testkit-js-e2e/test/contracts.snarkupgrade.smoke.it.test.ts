@@ -14,7 +14,7 @@
  */
 
 import { sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
-import type { ContractAddress } from '@midnight-ntwrk/ledger';
+import type { ContractAddress } from '@midnight-ntwrk/ledger-v6';
 import {
   createCircuitMaintenanceTxInterfaces,
   findDeployedContract,
@@ -169,7 +169,7 @@ describe('Contracts API Snark Upgrade [@slow][@smoke]', () => {
         await counterProviders.privateStateProvider.setSigningKey(contractAddress, oldAuthority);
 
         await expect(submitRemoveVerifierKeyTx(counterProviders, contractAddress, CIRCUIT_ID_RESET)).rejects.toThrow(
-          'Invalid Transaction'
+          'Transaction submission error: Transaction submission failed'
         );
       }
     },

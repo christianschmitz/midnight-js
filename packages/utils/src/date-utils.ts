@@ -13,25 +13,4 @@
  * limitations under the License.
  */
 
-import { type NetworkId } from './network-id';
-
-// Module level state that will be preserved by the JavaScript module system.
-let currentNetworkId: NetworkId = 'undeployed';
-
-/**
- * Sets the global network identifier.
- *
- * @param id A valid {@link NetworkId} value.
- */
-export const setNetworkId = (id: NetworkId): void => {
-  currentNetworkId = id;
-};
-
-/**
- * Retrieves the currently set global network identifier.
- *
- * @returns The currently set {@link NetworkId}.
- */
-export const getNetworkId = (): NetworkId => currentNetworkId;
-
-export * from './network-id';
+export const ttlOneHour = () => new Date(Date.now() + 60 * 60 * 1000);

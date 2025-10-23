@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-import { getNetworkId, NetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
+import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
 import type { Logger } from 'pino';
 import { DockerComposeEnvironment, type StartedDockerComposeEnvironment } from 'testcontainers';
 
-import { getContainersConfiguration } from '../../configuration';
-import type { StandaloneContainersConfiguration } from '../../configuration-types';
-import { getEnvVarWalletSeeds } from '../../env-vars';
-import type { ProofServerContainer } from '../../proof-server-container';
-import { MidnightWalletProvider } from '../../wallet';
-import type { EnvironmentConfiguration } from '../environment-configuration';
-import { TestEnvironment } from '../test-environment';
+import { getContainersConfiguration } from '@/configuration';
+import type { StandaloneContainersConfiguration } from '@/configuration-types';
+import { getEnvVarWalletSeeds } from '@/env-vars';
+import type { ProofServerContainer } from '@/proof-server-container';
+import type { EnvironmentConfiguration } from '@/test-environment';
+import { MidnightWalletProvider } from '@/wallet';
+
+import { TestEnvironment } from './test-environment';
 
 /**
  * Configuration for component ports in the local test environment
@@ -38,9 +40,12 @@ export type ComponentPortsConfiguration = {
  * Configuration class for local test environment implementing EnvironmentConfiguration
  */
 export class LocalTestConfiguration implements EnvironmentConfiguration {
+  readonly walletNetworkId: NetworkId.NetworkId;
+  readonly networkId: string;
   readonly indexer: string;
   readonly indexerWS: string;
   readonly node: string;
+  readonly nodeWS: string;
   readonly proofServer: string;
   readonly faucet: string | undefined;
 
@@ -49,9 +54,12 @@ export class LocalTestConfiguration implements EnvironmentConfiguration {
    * @param {ComponentPortsConfiguration} ports - Object containing port numbers for each component
    */
   constructor({ indexer, node, proofServer }: ComponentPortsConfiguration) {
-    this.indexer = `http://127.0.0.1:${indexer}/api/v1/graphql`;
-    this.indexerWS = `ws://127.0.0.1:${indexer}/api/v1/graphql/ws`;
+    this.walletNetworkId = NetworkId.NetworkId.Undeployed;
+    this.networkId = 'undeployed';
+    this.indexer = `http://127.0.0.1:${indexer}/api/v3/graphql`;
+    this.indexerWS = `ws://127.0.0.1:${indexer}/api/v3/graphql/ws`;
     this.node = `http://127.0.0.1:${node}`;
+    this.nodeWS = `ws://127.0.0.1:${node}`;
     this.proofServer = `http://127.0.0.1:${proofServer}`;
     this.faucet = undefined;
   }
@@ -64,8 +72,8 @@ export class LocalTestConfiguration implements EnvironmentConfiguration {
 export class LocalTestEnvironment extends TestEnvironment {
   static readonly MAX_NUMBER_OF_WALLETS = 4;
   readonly genesisMintWalletSeed = [
-    '0000000000000000000000000000000000000000000000000000000000000001',
     '0000000000000000000000000000000000000000000000000000000000000002',
+    '0000000000000000000000000000000000000000000000000000000000000001',
     '0000000000000000000000000000000000000000000000000000000000000003',
     '0000000000000000000000000000000000000000000000000000000000000004'
   ];
@@ -82,6 +90,28 @@ export class LocalTestEnvironment extends TestEnvironment {
   constructor(logger: Logger) {
     super(logger);
     this.config = getContainersConfiguration().standalone;
+  }
+
+  /**
+   * Returns the configuration for the testnet environment services.
+   * @returns {EnvironmentConfiguration} Object containing URLs for testnet services:
+   * - indexer: GraphQL API endpoint for the indexer
+   * - indexerWS: WebSocket endpoint for the indexer
+   * - node: RPC endpoint for the blockchain node
+   * - faucet: API endpoint for requesting test tokens
+   * - proofServer: URL for the proof generation server
+   */
+  getEnvironmentConfiguration(): EnvironmentConfiguration {
+    return {
+      walletNetworkId: this.environmentConfiguration?.walletNetworkId,
+      networkId: this.environmentConfiguration?.networkId,
+      indexer: this.environmentConfiguration?.indexer,
+      indexerWS: this.environmentConfiguration?.indexerWS,
+      node: this.environmentConfiguration?.node,
+      nodeWS: this.environmentConfiguration?.nodeWS,
+      faucet: this.environmentConfiguration?.faucet,
+      proofServer: this.environmentConfiguration?.proofServer
+    };
   }
 
   /**
@@ -114,7 +144,7 @@ export class LocalTestEnvironment extends TestEnvironment {
   startWithInjectedEnvironment = async (
     dockerEnv: StartedDockerComposeEnvironment,
     ports: ComponentPortsConfiguration
-  ) => {
+  ): Promise<EnvironmentConfiguration> => {
     this.logger.info(`Starting test environment...`);
     this.dockerEnv = dockerEnv;
     this.environmentConfiguration = new LocalTestConfiguration(ports);
@@ -146,7 +176,7 @@ export class LocalTestEnvironment extends TestEnvironment {
       .withWaitStrategy(`${this.config.container.indexer.name}_${this.uid}`, this.config.container.indexer.waitStrategy)
       .withEnvironment({
         TESTCONTAINERS_UID: this.uid,
-        NETWORK_ID: NetworkId[getNetworkId()].toLowerCase()
+        NETWORK_ID: getNetworkId()
       })
       .up();
     this.environmentConfiguration = new LocalTestConfiguration(this.getMappedPorts());
@@ -164,7 +194,7 @@ export class LocalTestEnvironment extends TestEnvironment {
       if (saveWalletState) {
         this.logger.warn('Skipping wallet save state as it is obsolete in this context...');
       }
-      await Promise.all(this.walletProviders.map((wallet) => wallet.close()));
+      await Promise.all(this.walletProviders.map((wallet) => wallet.stop()));
     }
     if (this.dockerEnv) {
       await this.dockerEnv.down({ timeout: 10000, removeVolumes: true });

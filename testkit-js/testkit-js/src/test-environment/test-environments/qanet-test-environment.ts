@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-import type { EnvironmentConfiguration } from '../environment-configuration';
+import { NetworkId } from '@midnight-ntwrk/wallet-sdk-abstractions';
+
+import type { EnvironmentConfiguration } from '@/test-environment';
+
 import { RemoteTestEnvironment } from './remote-test-environment';
 
 /**
@@ -32,11 +35,14 @@ export class QanetTestEnvironment extends RemoteTestEnvironment {
    */
   getEnvironmentConfiguration(): EnvironmentConfiguration {
     return {
-      indexer: 'https://indexer.qanet.dev.midnight.network/api/v1/graphql',
-      indexerWS: 'wss://indexer.qanet.dev.midnight.network/api/v1/graphql/ws',
+      walletNetworkId: NetworkId.NetworkId.DevNet,
+      networkId: 'devnet',
+      indexer: 'https://indexer.qanet.dev.midnight.network/api/v3/graphql',
+      indexerWS: 'wss://indexer.qanet.dev.midnight.network/api/v3/graphql/ws',
       node: 'https://rpc.qanet.dev.midnight.network',
+      nodeWS: 'wss://rpc.qanet.dev.midnight.network',
       faucet: 'https://faucet.qanet.dev.midnight.network/api/request-tokens',
-      proofServer: this.proofServerContainer.getUrl()
+      proofServer: this.proofServerContainer?.getUrl()
     };
   }
 }
