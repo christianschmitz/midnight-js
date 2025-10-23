@@ -17,8 +17,9 @@ import { FileSystem, Path } from '@effect/platform';
 import { CompiledContract, type Contract, ContractRuntimeError } from '@midnight-ntwrk/compact-js/effect';
 import * as Hex from '@midnight-ntwrk/platform-js/effect/Hex'
 import { Effect, Either, identity, Layer } from 'effect';
-import { parse, stringify } from 'json5';
+import pkg from 'json5';
 import TS from 'typescript';
+const { parse, stringify } = pkg;
 
 import * as CompiledContractReflection from "../CompiledContractReflection.js";
 
