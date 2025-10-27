@@ -2515,6 +2515,7 @@ __metadata:
     "@midnight-ntwrk/ledger": "npm:@midnight-ntwrk/ledger-v6@6.1.0-alpha.4"
     "@midnight-ntwrk/midnight-js-compact": "workspace:*"
     "@midnight-ntwrk/platform-js": "npm:^2.1.0"
+    "@midnight-ntwrk/wallet-sdk-address-format": "npm:3.0.0-beta.4"
     effect: "npm:^3.18.4"
     json5: "npm:^2.2.3"
     ts-node: "npm:^10.9.2"
