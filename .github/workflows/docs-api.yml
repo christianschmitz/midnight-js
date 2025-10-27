@@ -70,8 +70,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTBOT_PACKAGES_WRITE }}
 
-      - name: Generate documentation
-        run: yarn run build:markdown-docs
+      - name: Generate documentation (midnight-js and testkit-js)
+        run: |
+          yarn run build:markdown-docs
+          cd testkit-js/testkit-js && yarn run build:markdown-docs
 
       - name: Check if there are changes in docs and create a new branch
         id: set_update
