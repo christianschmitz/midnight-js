@@ -46,8 +46,8 @@
     "@midnight-ntwrk/wallet-sdk-facade": "1.0.0-beta.6"
   },
   "devDependencies": {
-    "@commitlint/cli": "^18.4.3",
-    "@commitlint/config-conventional": "^18.4.3",
+    "@commitlint/cli": "^20.0.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@d2t/vitest-ctrf-json-reporter": "^1.1.0",
     "@effect/build-utils": "^0.8.9",
     "@eslint/js": "^9.30.1",
@@ -70,7 +70,7 @@
     "eslint-plugin-unused-imports": "^4.1.4",
     "glob": "^11.0.3",
     "husky": "^9.1.7",
-    "jsdom": "^26.1.0",
+    "jsdom": "^27.0.0",
     "lint-staged": "^16.1.2",
     "patch-package": "^8.0.1",
     "pinst": "^3.0.0",
@@ -83,7 +83,7 @@
     "tstyche": "^4.3.0",
     "turbo": "^2.5.5",
     "typedoc": "^0.28.5",
-    "typedoc-plugin-markdown": "4.8.1",
+    "typedoc-plugin-markdown": "4.9.0",
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.35.1",
     "vitest": "^3.2.4"
