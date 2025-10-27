@@ -21,6 +21,8 @@ import pkg from 'json5';
 import TS from 'typescript';
 const { parse, stringify } = pkg;
 
+import { MidnightBech32m, UnshieldedAddress } from '@midnight-ntwrk/wallet-sdk-address-format';
+
 import * as CompiledContractReflection from "../CompiledContractReflection.js";
 
 const CONTRACT_FOLDER = 'contract';
@@ -65,6 +67,15 @@ class BasicHost implements TS.LanguageServiceHost {
     return file?.getText(0, file?.getLength())
   }
 }
+
+const parseBech32mToHex = (input: string): Either.Either<string, Error> =>
+  Either.try({
+    try: () => {
+      const parsedBech32 = MidnightBech32m.parse(input);
+      return UnshieldedAddress.codec.decode(parsedBech32.network, parsedBech32).hexString;
+    },
+    catch: (error) => error instanceof Error ? error : new Error(String(error))
+  });
 
 const typeNodeName: (type: TS.TypeNode) => string =
   (type) => {
@@ -168,10 +179,20 @@ const transformParams: (
           if (type!.kind === TS.SyntaxKind.TypeReference) {
             const typeName = (type as TS.TypeReferenceNode).typeName;
             if (TS.isIdentifier(typeName) && typeName.escapedText === 'Uint8Array') {
-              return Either.match(Hex.parseHex(quotedStrings ? args[idx].replaceAll('\'', '') : args[idx]), {
+              const cleanInput = quotedStrings ? args[idx].replaceAll('\'', '') : args[idx];
+
+              const bech32Result = parseBech32mToHex(cleanInput);
+              const hexString = Either.match(bech32Result, {
+                onLeft: () => cleanInput,
+                onRight: (hex) => hex
+              });
+
+              return Either.match(Hex.parseHex(hexString), {
                 onRight: (parsedHex) => Buffer.from(parsedHex.byteChars, 'hex'),
                 onLeft: (parseErr) => {
-                  throw new SyntaxError(`Cannot convert ${args[idx]} to a Uint8Array: ${parseErr.message}`);
+                  throw new SyntaxError(
+                    `Cannot convert ${args[idx]} to a Uint8Array: ${parseErr.message}`
+                  );
                 }
               });
             }
