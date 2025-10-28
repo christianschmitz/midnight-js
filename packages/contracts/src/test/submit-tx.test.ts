@@ -41,7 +41,9 @@ describe('submitTx', () => {
     it('should successfully submit transaction without circuit ID', async () => {
       const mockRecipe = { type: 'TransactionToProve' as const, transaction: mockProvenTx };
       const mockFinalizedTxData = createMockFinalizedTxData();
+      const mockIdentifier = 'test-identifier';
 
+      mockProvenTx.identifiers = vi.fn().mockReturnValue([mockIdentifier]);
       mockProviders.walletProvider.balanceTx = vi.fn().mockResolvedValue(mockRecipe);
       mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
       mockProviders.midnightProvider.submitTx = vi.fn().mockResolvedValue('test-tx-id');
@@ -56,7 +58,7 @@ describe('submitTx', () => {
       expect(mockProviders.walletProvider.balanceTx).toHaveBeenCalledWith(mockUnprovenTx, undefined);
       expect(mockProviders.proofProvider.proveTx).toHaveBeenCalledWith(mockProvenTx, undefined);
       expect(mockProviders.midnightProvider.submitTx).toHaveBeenCalled();
-      expect(mockProviders.publicDataProvider.watchForTxData).toHaveBeenCalledWith('test-tx-id');
+      expect(mockProviders.publicDataProvider.watchForTxData).toHaveBeenCalledWith(mockIdentifier);
       expect(result).toBe(mockFinalizedTxData);
     });
 
@@ -65,7 +67,9 @@ describe('submitTx', () => {
       const mockZkConfig = { zkConfig: 'test-config' };
       const mockRecipe = { type: 'TransactionToProve' as const, transaction: mockProvenTx };
       const mockFinalizedTxData = createMockFinalizedTxData();
+      const mockIdentifier = 'test-identifier';
 
+      mockProvenTx.identifiers = vi.fn().mockReturnValue([mockIdentifier]);
       mockProviders.zkConfigProvider.get = vi.fn().mockResolvedValue(mockZkConfig);
       mockProviders.walletProvider.balanceTx = vi.fn().mockResolvedValue(mockRecipe);
       mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
@@ -83,7 +87,7 @@ describe('submitTx', () => {
       expect(mockProviders.walletProvider.balanceTx).toHaveBeenCalledWith(mockUnprovenTx, undefined);
       expect(mockProviders.proofProvider.proveTx).toHaveBeenCalledWith(mockProvenTx, { zkConfig: mockZkConfig });
       expect(mockProviders.midnightProvider.submitTx).toHaveBeenCalled();
-      expect(mockProviders.publicDataProvider.watchForTxData).toHaveBeenCalledWith('test-tx-id');
+      expect(mockProviders.publicDataProvider.watchForTxData).toHaveBeenCalledWith(mockIdentifier);
       expect(result).toBe(mockFinalizedTxData);
     });
   });
