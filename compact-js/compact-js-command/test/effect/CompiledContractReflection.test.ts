@@ -36,7 +36,7 @@ const testLayer: Layer.Layer<
 
 /**
  * Sets up a dummy contract and context for an `ArgumentParser` test fixture.
- * 
+ *
  * @param argText A string defining on or more JS/TS arguments (in the form `'argName: argType'`).
  * @param fn A function receiving an `ArgumentParser` that should return an array  from arguments
  * called with it.
@@ -172,6 +172,48 @@ describe.sequential('CompiledContractReflection', () => {
         );
         expect(parsedArgs[0].x).toBeInstanceOf(Uint8Array);
         expect(parsedArgs[0]).toMatchObject({ y: { y1: 200n, y2: 'doggo' }, z: 'hosky' });
+      }).pipe(Effect.provide(testLayer)));
+    });
+
+    it('should parse object with bytes property as Bech32m-encoded string', async () => {
+      await Effect.runPromise(Effect.gen(function* () {
+        const bech32Address = 'mn_addr_undeployed1h3ssm5ru2t6eqy4g3she78zlxn96e36ms6pq996aduvmateh9p9sk96u7s';
+        const expected = 'bc610dd07c52f59012a88c2f9f1c5f34cbacc75b868202975d6f19beaf37284b';
+
+        const parsedArgs = yield* parseArgumentsTest(
+          'a: { bytes: Uint8Array }',
+          (_) => _.parseInitializationArgs([`{ bytes: '${bech32Address}' }`])
+        );
+
+        expect(parsedArgs[0].bytes).toBeInstanceOf(Uint8Array);
+        const bytesAsHex = Buffer.from(parsedArgs[0].bytes).toString('hex');
+        expect(bytesAsHex).toEqual(expected);
+      }).pipe(Effect.provide(testLayer)));
+    });
+
+    it('should successfully parse object with bytes property as hex string', async () => {
+      await Effect.runPromise(Effect.gen(function* () {
+        const parsedArgs = yield* parseArgumentsTest(
+          'a: { bytes: Uint8Array }',
+          (_) => _.parseInitializationArgs(["{ bytes: 'ffffff' }"])
+        );
+
+        expect(parsedArgs[0].bytes).toBeInstanceOf(Uint8Array);
+        expect(Array.from(parsedArgs[0].bytes)).toEqual([255, 255, 255]);
+      }).pipe(Effect.provide(testLayer)));
+    });
+
+    it('should parse object with nested bytes property as Bech32m string', async () => {
+      await Effect.runPromise(Effect.gen(function* () {
+        const bech32Address = 'mn_addr_undeployed1h3ssm5ru2t6eqy4g3she78zlxn96e36ms6pq996aduvmateh9p9sk96u7s';
+
+        const parsedArgs = yield* parseArgumentsTest(
+          'a: { data: { bytes: Uint8Array }, label: string }',
+          (_) => _.parseInitializationArgs([`{ data: { bytes: '${bech32Address}' }, label: 'test' }`])
+        );
+
+        expect(parsedArgs[0].data.bytes).toBeInstanceOf(Uint8Array);
+        expect(parsedArgs[0].label).toBe('test');
       }).pipe(Effect.provide(testLayer)));
     });
   });
