@@ -289,7 +289,7 @@ export const CONTRACT_AND_ZSWAP_STATE_QUERY = gql(
   query BOTH_STATE_QUERY($address: HexEncoded!, $offset: ContractActionOffset) {
     contractAction(address: $address, offset: $offset) {
       state
-      chainState
+      zswapState
     }
   }`
 );
