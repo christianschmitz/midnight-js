@@ -66,9 +66,7 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
   }
 
   async balanceTx(tx: UnprovenTransaction, _newCoins: ShieldedCoinInfo[], ttl: Date = ttlOneHour()): Promise<ProvingRecipe<UnprovenTransaction | FinalizedTransaction>> {
-    // TODO: workaround, remove after fixes
-    return this.wallet.dust.addFeePayment(this.dustSecretKey, tx, new Date(Date.now()), ttl);
-    // return this.wallet.balanceTransaction(this.zswapSecretKeys, this.dustSecretKey, tx, ttl);
+    return this.wallet.balanceTransaction(this.zswapSecretKeys, this.dustSecretKey, tx, ttl);
   }
 
   async finalizeTx(recipe: ProvingRecipe<FinalizedTransaction>): Promise<FinalizedTransaction> {

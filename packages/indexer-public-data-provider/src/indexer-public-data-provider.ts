@@ -509,7 +509,7 @@ const indexerPublicDataProviderInternal = (
         .then((queryResult) => queryResult.data.contractAction);
       //TODO: this has to be checked: maybeContractStates.chainState ? deserializeZswapState(maybeContractStates.chainState) : new ZswapChainState()
       return maybeContractStates
-        ? [maybeContractStates.chainState ? deserializeZswapState(maybeContractStates.chainState) : new ZswapChainState(), deserializeContractState(maybeContractStates.state)]
+        ? [deserializeZswapState(maybeContractStates.chainState), deserializeContractState(maybeContractStates.state)]
         : null;
     },
     async queryUnshieldedBalances(
