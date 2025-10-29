@@ -73,7 +73,7 @@ export const submitTx = async <C extends Contract, ICK extends ImpureCircuitId<C
   const proveTxConfig = options.circuitId
     ? { zkConfig: await providers.zkConfigProvider.get(options.circuitId) }
     : undefined;
-    const recipe = await providers.walletProvider.balanceTx(options.unprovenTx, options.newCoins);
+  const recipe = await providers.walletProvider.balanceTx(options.unprovenTx, options.newCoins);
   // TODO: we can switch to 'await providers.walletProvider.finalizeTx(recipe)' once it supports ZKConfig
   // TODO: unsafe cast just for temporal workaround
   const provenTx = await providers.proofProvider.proveTx((recipe as TransactionToProve).transaction , proveTxConfig);
@@ -96,8 +96,8 @@ export const submitTx = async <C extends Contract, ICK extends ImpureCircuitId<C
       console.log(`Vtx: ${vtx}`);
     }
   }
+  // TODO: workaround for incorrect txId
   const _txId = await providers.midnightProvider.submitTx(bound);
-  //TODO: workaround
   const id = provenTx.identifiers()[0];
   return await providers.publicDataProvider.watchForTxData(id);
 };
