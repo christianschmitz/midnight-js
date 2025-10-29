@@ -15,7 +15,7 @@ services:
       start_period: 10s
 
   indexer:
-    image: 'ghcr.io/midnight-ntwrk/indexer-standalone:3.0.0-8ddd36ef'
+    image: 'ghcr.io/midnight-ntwrk/indexer-standalone:3.0.0-alpha.6'
     container_name: indexer_$TESTCONTAINERS_UID
     ports:
       - '8088'
@@ -39,7 +39,7 @@ services:
         condition: service_healthy
 
   node:
-    image: 'ghcr.io/midnight-ntwrk/midnight-node:0.17.1-8d7c529d'
+    image: 'ghcr.io/midnight-ntwrk/midnight-node:0.18.0-rc.1'
     container_name: node_$TESTCONTAINERS_UID
     ports:
       - '9944'
