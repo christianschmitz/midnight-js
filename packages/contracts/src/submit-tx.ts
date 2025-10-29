@@ -96,8 +96,6 @@ export const submitTx = async <C extends Contract, ICK extends ImpureCircuitId<C
       console.log(`Vtx: ${vtx}`);
     }
   }
-  // TODO: workaround for incorrect txId
-  const _txId = await providers.midnightProvider.submitTx(bound);
-  const id = provenTx.identifiers()[0];
-  return await providers.publicDataProvider.watchForTxData(id);
+  const txId = await providers.midnightProvider.submitTx(bound);
+  return await providers.publicDataProvider.watchForTxData(txId);
 };
