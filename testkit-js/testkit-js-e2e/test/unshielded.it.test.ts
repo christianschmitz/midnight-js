@@ -96,26 +96,23 @@ describe('Unshielded tokens', () => {
     await testEnvironment.shutdown();
   });
 
-  test.skip('should mint tokens', async () => {
-    // Act & Assert - Mint unshielded token to self
-    logger.info(`Submit tx`);
+  test('should mint tokens', async () => {
     const mintTxData = await submitCallTx(providers, {
       contract: unshieldedContract,
       contractAddress,
-      circuitId: 'mintUnshieldedToSelfTest' as UnshieldedContractCircuits,
+      circuitId: 'mintToSelfReceive' as UnshieldedContractCircuits,
       args: [TEST_DOMAIN_SEP, TEST_TOKEN_AMOUNT]
     });
 
-    logger.info(`Verify submitted tx`);
     expect(mintTxData.public.status).toBe(SucceedEntirely);
     expect(mintTxData.public.unshielded).toBeDefined();
 
-    const mintedToken = mintTxData.public.unshielded.created;
-    expect(mintedToken.length).toEqual(1);
-    expect(mintedToken.at(0)?.value).toEqual(TEST_TOKEN_AMOUNT);
-    expect(mintedToken.at(0)?.owner).toEqual(TEST_DOMAIN_SEP);
+    const created = mintTxData.public.unshielded.created;
+    const spent = mintTxData.public.unshielded.spent;
+    expect(created.length).toEqual(0);
+    expect(spent.length).toEqual(0);
 
-    logger.info(`Minted token: ${JSON.stringify(mintedToken)}`);
+    logger.info(`Minted token: ${JSON.stringify(mintTxData)}`);
   });
 
   test('should get balance of tokens - 0 value', async () => {
