@@ -104,9 +104,7 @@ jobs:
       - name: Publish packages
         if: steps.changes.outputs.midnight-js == 'true'
         run: |
-          rm docs/image/deployment-diagram.png || true
-          rm docs/image/call-tx-build-sequence-diagram.png || true
-          yarn deploy --filter="./packages/*" --cache-dir ./turbo
+          yarn deploy --filter="./packages/*" --cache-dir ./turbo --concurrency=1
         env:
           GITHUB_TOKEN: ${{ secrets.MIDNIGHTCI_PACKAGES_WRITE }}
 
