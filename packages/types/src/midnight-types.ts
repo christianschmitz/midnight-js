@@ -222,9 +222,13 @@ export interface FinalizedTxData {
    */
   readonly status: TxStatus;
   /**
-   * The transaction ID of the submitted transaction.
+   * One of the transaction ID of the submitted transaction.
    */
   readonly txId: TransactionId;
+  /**
+   * All transaction IDs of the submitted transaction.
+   */
+  readonly identifiers: TransactionId[];
   /**
    * The transaction hash of the transaction in which the original transaction was included.
    */
