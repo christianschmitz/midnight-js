@@ -145,6 +145,7 @@ describe('Indexer API', () => {
     const finalizedTxData = await publicDataProvider.watchForDeployTxData(finalizedDeployTxData.public.contractAddress);
 
     expect(finalizedTxData.status).toEqual(SucceedEntirely);
+    expect(finalizedTxData.identifiers).toEqual(finalizedDeployTxData.public.identifiers);
     expect(finalizedTxData.txId).toEqual(finalizedDeployTxData.public.txId);
     expect(finalizedTxData.txHash).toEqual(finalizedDeployTxData.public.txHash);
     expect(finalizedTxData.blockHash).toEqual(finalizedDeployTxData.public.blockHash);
