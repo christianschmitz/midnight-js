@@ -223,6 +223,7 @@ export const createMockProviders = (): ContractProviders<Contract, CoinPublicKey
 export const createMockFinalizedTxData = (status: TxStatus = SucceedEntirely): FinalizedTxData => ({
   status: status,
   txId: 'test-tx-id',
+  identifiers: ['test-tx-id-0', 'test-tx-id'],
   blockHeight: 100,
   tx: {} as Transaction<SignatureEnabled, Proof, Binding>,
   txHash: 'hash',
