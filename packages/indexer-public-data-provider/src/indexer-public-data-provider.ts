@@ -609,7 +609,7 @@ const indexerPublicDataProviderInternal = (
                 tx: deserializeTransaction(transaction.raw),
                 status: toTxStatus(transaction.transactionResult),
                 txId: transaction.identifiers[
-                  transaction.contractActions.findLastIndex(({ address }) => address === contractAddress)
+                  transaction.contractActions.findIndex(({ address }) => address === contractAddress)
                 ]!,
                 identifiers: transaction.identifiers,
                 txHash: transaction.hash,

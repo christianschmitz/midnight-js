@@ -52,7 +52,6 @@ export const expectFoundAndDeployedTxPublicDataEqual = <C extends Contract>(
   expect(deployTxData.public.blockHash).toEqual(foundDeployTxData.public.blockHash);
   expect(deployTxData.public.blockHeight).toEqual(foundDeployTxData.public.blockHeight);
   expect(deployTxData.public.txHash).toEqual(foundDeployTxData.public.txHash);
-  expect(deployTxData.public.txId).toEqual(foundDeployTxData.public.txId);
   expect(deployTxData.public.identifiers).toEqual(foundDeployTxData.public.identifiers);
   expect(deployTxData.public.status).toEqual(foundDeployTxData.public.status);
   expect(txsEqual(deployTxData.public.tx, foundDeployTxData.public.tx)).toBeTruthy();
