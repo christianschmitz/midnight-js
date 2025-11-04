@@ -611,6 +611,7 @@ const indexerPublicDataProviderInternal = (
                 txId: transaction.identifiers[
                   transaction.contractActions.findIndex(({ address }) => address === contractAddress)
                 ]!,
+                identifiers: transaction.identifiers,
                 txHash: transaction.hash,
                 blockHeight: transaction.block.height,
                 blockHash: transaction.block.hash,
@@ -651,6 +652,7 @@ const indexerPublicDataProviderInternal = (
                 status: toTxStatus(transaction.transactionResult),
                 txId,
                 txHash: transaction.hash,
+                identifiers: transaction.identifiers,
                 blockHeight: transaction.block.height,
                 blockHash: transaction.block.hash,
                 segmentStatusMap: toSegmentStatusMap(transaction.transactionResult),
