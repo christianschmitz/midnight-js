@@ -123,14 +123,14 @@ const withZeroMtIndex = (coinInfos: ShieldedCoinInfo[]): QualifiedShieldedCoinIn
   coinInfos.map((coin) => ({ ...coin, mt_index: 0n }));
 
 describe('Zswap utilities', () => {
-  test("instanceOf works on 'Uint8Array' and 'Buffer'", () => {
+  test("should work with instanceof on 'Uint8Array' and 'Buffer'", () => {
     expect(randomBytes(32) instanceof Uint8Array).toBe(true);
     expect(randomBytes(32) instanceof Buffer).toBe(true);
     expect(randomBytes(32).valueOf() instanceof Uint8Array).toBe(true);
     expect(randomBytes(32).valueOf() instanceof Buffer).toBe(true);
   });
 
-  test("attempting to serialize a 'CoinInfo' with additional properties throws an error", () =>
+  test("should throw error when attempting to serialize a 'CoinInfo' with additional properties", () =>
     expect(() =>
       serializeCoinInfo({
         nonce: toHex(randomBytes(32)),
@@ -140,7 +140,7 @@ describe('Zswap utilities', () => {
       } as ShieldedCoinInfo)
     ).toThrowError());
 
-  test("attempting to deserialize a string representing a 'CoinInfo' with additional properties throws an error", () =>
+  test("should throw error when attempting to deserialize a string representing a 'CoinInfo' with additional properties", () =>
     expect(() =>
       deserializeCoinInfo(
         JSON.stringify({
@@ -152,14 +152,14 @@ describe('Zswap utilities', () => {
       )
     ).toThrowError());
 
-  test("serializing then deserializing 'CoinInfo' produces the original value", () =>
+  test("should produce the original value when serializing then deserializing 'CoinInfo'", () =>
     fc.assert(
       fc.property(arbitraryCoinInfo, (coinInfo) => {
         expect(deserializeCoinInfo(serializeCoinInfo(coinInfo))).toEqual(coinInfo);
       })
     ));
 
-  test("serializing 'QualifiedShieldedCoinInfo' then deserializing 'CoinInfo' produces the original value without 'mt_index'", () =>
+  test("should produce the original value without 'mt_index' when serializing 'QualifiedShieldedCoinInfo' then deserializing 'CoinInfo'", () =>
     fc.assert(
       fc.property(arbitraryQualifiedShieldedCoinInfo, (qualifiedCoinInfo) => {
         expect(deserializeCoinInfo(serializeQualifiedShieldedCoinInfo(qualifiedCoinInfo))).toEqual(
@@ -168,7 +168,7 @@ describe('Zswap utilities', () => {
       })
     ));
 
-  test("'QualifiedShieldedCoinInfo' and extracted 'CoinInfo' serialized strings are equal", () =>
+  test("should have equal serialized strings for 'QualifiedShieldedCoinInfo' and extracted 'CoinInfo'", () =>
     fc.assert(
       fc.property(arbitraryQualifiedShieldedCoinInfo, (qualifiedCoinInfo) => {
         expect(serializeCoinInfo(dropMtIndex(qualifiedCoinInfo))).toEqual(
@@ -177,7 +177,7 @@ describe('Zswap utilities', () => {
       })
     ));
 
-  test("Calling 'zswapStateToOffer' with no chain state and inputs throws error", () =>
+  test("should throw error when calling 'zswapStateToOffer' with no chain state and inputs", () =>
     expect(() =>
       zswapStateToOffer(
         {
@@ -307,7 +307,7 @@ describe('Zswap utilities', () => {
         );
     });
 
-  test('expected number of inputs, outputs, and transients are created [@slow]', () =>
+  test('should create expected number of inputs, outputs, and transients [@slow]', () =>
     fc.assert(
       fc.property(
         arbitraryZswapScenario,
@@ -347,7 +347,7 @@ describe('Zswap utilities', () => {
       )
     ));
 
-  test('zswapStateToNewCoins returns only coins meant for provided wallet', () => {
+  test('should return only coins meant for provided wallet in zswapStateToNewCoins', () => {
     type ScenarioData = {
       walletCoinPublicKey: CoinPublicKey;
       outputsForWallet: { recipient: Recipient; coinInfo: ShieldedCoinInfo }[];
@@ -388,7 +388,7 @@ describe('Zswap utilities', () => {
   });
 
   describe('Edge cases for inputs, outputs, and transients', () => {
-    test('returns undefined offer for empty zswap state - changed in ledger 6', () => {
+    test('should return undefined offer for empty zswap state - changed in ledger 6', () => {
       const emptyZswapState = {
         currentIndex: 0n,
         coinPublicKey: randomCoinPublicKey(),
@@ -400,7 +400,7 @@ describe('Zswap utilities', () => {
       expect(result).toBeUndefined();
     });
 
-    test('creates correct number of outputs when no inputs', () => {
+    test('should create correct number of outputs when no inputs', () => {
       const outputData = randomOutputData();
       const zswapState = {
         currentIndex: 0n,
@@ -416,7 +416,7 @@ describe('Zswap utilities', () => {
       expect(result!.transients.length).toBe(0);
     });
 
-    test('creates correct number of inputs when addressAndChainStateTuple provided', () => {
+    test('should create correct number of inputs when addressAndChainStateTuple provided', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const { zswapChainState, nonMatchingInputs } = zswapChainStateWithNonMatchingInputs(recipient, [100n]);
 
@@ -439,7 +439,7 @@ describe('Zswap utilities', () => {
       expect(result!.transients.length).toBe(0);
     });
 
-    test('handles mixed inputs, outputs, and transients', () => {
+    test('should handle mixed inputs, outputs, and transients', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const { zswapChainState, nonMatchingInputs } = zswapChainStateWithNonMatchingInputs(recipient, [50n]);
 
@@ -469,7 +469,7 @@ describe('Zswap utilities', () => {
       expect(result!.transients.length).toBe(1); // transientCoinInfo
     });
 
-    test('zero value outputs are handled correctly', () => {
+    test('should handle zero value outputs correctly', () => {
       const zeroValueOutput = {
         recipient: sampleOne(arbitraryContractRecipient),
         coinInfo: createShieldedCoinInfo(nativeToken().raw, 0n)
@@ -490,7 +490,7 @@ describe('Zswap utilities', () => {
       expect(result!.deltas.get(nativeToken().raw), result!.toString()).toBe(0n);
     });
 
-    test('zero value inputs with addressAndChainStateTuple are handled correctly', () => {
+    test('should handle zero value inputs with addressAndChainStateTuple correctly', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const { zswapChainState } = zswapChainStateWithNonMatchingInputs(recipient, [0n]);
       const zeroValueInput = { ...createShieldedCoinInfo(nativeToken().raw, 0n), mt_index: 0n };
@@ -515,7 +515,7 @@ describe('Zswap utilities', () => {
       expect(result!.deltas.get(nativeToken().raw), result!.toString()).toBe(0n);
     });
 
-    test('single matching input-output pair creates transient', () => {
+    test('should create transient for single matching input-output pair', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const coinInfo = createShieldedCoinInfo(nativeToken().raw, 100n);
       const qualifiedInput = { ...coinInfo, mt_index: 0n };
@@ -536,7 +536,7 @@ describe('Zswap utilities', () => {
       expect(result!.deltas.get(nativeToken().raw)).toBeUndefined();
     });
 
-    test('zero value matching pair creates transient with zero delta', () => {
+    test('should create transient with zero delta for zero value matching pair', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const coinInfo = createShieldedCoinInfo(nativeToken().raw, 0n);
       const qualifiedInput = { ...coinInfo, mt_index: 0n };
@@ -557,7 +557,7 @@ describe('Zswap utilities', () => {
       expect(result!.deltas.get(nativeToken().raw), result!.toString()).toBeUndefined();
     });
 
-    test('only outputs without addressAndChainStateTuple produces negative delta', () => {
+    test('should produce negative delta for only outputs without addressAndChainStateTuple', () => {
       const output = {
         recipient: sampleOne(arbitraryContractRecipient),
         coinInfo: createShieldedCoinInfo(nativeToken().raw, 50n)
@@ -578,7 +578,7 @@ describe('Zswap utilities', () => {
       expect(result!.deltas.get(nativeToken().raw)).toBe(-50n);
     });
 
-    test('only inputs with addressAndChainStateTuple produces positive delta', () => {
+    test('should produce positive delta for only inputs with addressAndChainStateTuple', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const { zswapChainState, nonMatchingInputs } = zswapChainStateWithNonMatchingInputs(recipient, [75n]);
 
@@ -602,7 +602,8 @@ describe('Zswap utilities', () => {
       expect(result!.deltas.get(nativeToken().raw)).toBe(75n);
     });
 
-    test('balanced inputs and outputs with addressAndChainStateTuple produces zero delta', () => {
+    // reference: PM-19382
+    test('should produce undefined delta for balanced inputs and outputs with addressAndChainStateTuple', () => {
       const recipient = sampleOne(arbitraryContractRecipient);
       const { zswapChainState, nonMatchingInputs } = zswapChainStateWithNonMatchingInputs(recipient, [100n]);
 
@@ -629,7 +630,6 @@ describe('Zswap utilities', () => {
       expect(result!.inputs.length).toBe(1);
       expect(result!.outputs.length).toBe(1);
       expect(result!.transients.length).toBe(0);
-      // BUG: PM-19382 - delta should be 0, but is currently undefined
       expect(result!.deltas.get(nativeToken().raw), result!.toString()).toBe(undefined);
     });
   });
