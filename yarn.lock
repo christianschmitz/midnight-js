@@ -3346,6 +3346,7 @@ __metadata:
   dependencies:
     "@midnight-ntwrk/midnight-js-network-id": "workspace:*"
     "@scure/base": "npm:^2.0.0"
+    "@types/node": "npm:^24.0.0"
   languageName: unknown
   linkType: soft
 
