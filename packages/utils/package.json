@@ -32,5 +32,8 @@
     "@midnight-ntwrk/midnight-js-network-id": "workspace:*",
     "@scure/base": "^2.0.0"
   },
+  "devDependencies": {
+    "@types/node": "^24.0.0"
+  },
   "stableVersion": "3.0.0"
 }

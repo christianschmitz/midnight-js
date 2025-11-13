@@ -389,26 +389,3 @@ jobs:
         with:
           name: test-results-junit-summary
           path: junit-test-results.xml
-
-  e2e_tests_reports_allure:
-    name: E2E Tests Reports to Allure Server
-    runs-on: ubuntu-latest
-    needs: e2e_tests
-    if: always() && (needs.e2e_tests.result == 'success' || needs.e2e_tests.result == 'failure')
-    steps:
-
-      - name: Download Test Results
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # ratchet:actions/download-artifact@v4
-        with:
-          pattern: test-results-*
-          path: test-results
-
-      - name: Send Results to Allure Server
-        uses: robkatona/send-allure-results@935714d2ab2c0de7b15a9d3e29a0cffe0fa64c59 # ratchet:robkatona/send-allure-results@v1.0.5
-        if: ${{ inputs.allure_upload && always() }}
-        with:
-          allure-server-url: https://allure-server.prd.midnight.tools
-          allure-results-directory: test-results/**/allure-results-*
-          project-id: ${{ inputs.allure_project_id }}
-          security-user: ${{ secrets.ALLURE_ADMIN_USER }}
-          security-pass: ${{ secrets.ALLURE_ADMIN_PASSWORD }}
