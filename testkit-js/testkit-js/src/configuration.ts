@@ -27,7 +27,7 @@ export const defaultContainersConfiguration: ContainersConfiguration = {
     container: {
       name: 'proof-server',
       port: 6300,
-      waitStrategy: Wait.forLogMessage('Actix runtime found; starting in Actix runtime')
+      waitStrategy: Wait.forListeningPorts().withStartupTimeout(3 * 60_000)
     }
   },
   standalone: {
