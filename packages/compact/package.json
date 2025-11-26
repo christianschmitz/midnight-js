@@ -15,7 +15,7 @@
   },
   "scripts": {
     "clean": "rm -rf dist tsconfig.build.tsbuildinfo tsconfig.tsbuildinfo managed dist",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "tsc -p tsconfig.build.json && cp src/run-compactc.cjs dist/",
     "lint": "eslint ./src",
     "typecheck": "tsc -p tsconfig.json",
     "deploy": "yarn npm publish"
@@ -26,8 +26,7 @@
     "typescript": "^5.8.2"
   },
   "files": [
-    "dist/",
-    "src/run-compactc.cjs"
+    "dist/"
   ],
   "stableVersion": "3.0.0"
 }
