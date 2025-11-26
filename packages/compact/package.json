@@ -11,7 +11,7 @@
   "type": "module",
   "bin": {
     "fetch-compactc": "dist/fetch-compact.mjs",
-    "run-compactc": "src/run-compactc.cjs"
+    "run-compactc": "dist/run-compactc.cjs"
   },
   "scripts": {
     "clean": "rm -rf dist tsconfig.build.tsbuildinfo tsconfig.tsbuildinfo managed dist",
@@ -26,7 +26,8 @@
     "typescript": "^5.8.2"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "src/run-compactc.cjs"
   ],
   "stableVersion": "3.0.0"
 }
