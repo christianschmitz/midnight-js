@@ -27,6 +27,7 @@ describe('StorageEncryption', () => {
       const decrypted = encryption.decrypt(encrypted);
 
       expect(decrypted).toBe(testData);
+      expect(decrypted).not.toBe(encrypted);
     });
 
     test('produces different ciphertext for same plaintext', () => {
