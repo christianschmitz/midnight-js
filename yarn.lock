@@ -3225,7 +3225,7 @@ __metadata:
     typescript: "npm:^5.8.2"
   bin:
     fetch-compactc: dist/fetch-compact.mjs
-    run-compactc: src/run-compactc.cjs
+    run-compactc: dist/run-compactc.cjs
   languageName: unknown
   linkType: soft
 
