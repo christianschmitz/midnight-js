@@ -37,6 +37,8 @@ import path from 'path';
 
 import { type ContractProviders } from './contract-providers';
 
+declare const __DEBUG__: boolean;
+
 /**
  * Configuration for {@link submitTx}.
  */
@@ -67,20 +69,35 @@ export type SubmitTxProviders<C extends Contract, ICK extends ImpureCircuitId<C>
 >;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function logAndCheckTransaction(circuitId: string | undefined, tx: Transaction<any, any, any>) {
-  if (process.env.MN_DEBUG) {
+function logTransaction(circuitId: string | undefined, tx: Transaction<any, any, any>) {
+  if (!__DEBUG__) {
+    return;
+  }
+
+  const debug = process.env.MN_DEBUG?.toLowerCase();
+  if (debug !== 'true') {
+    return;
+  }
+
+  try {
     console.log(`Submit tx: ${circuitId} : ${tx}`);
     const serialized = tx.serialize();
     const logsDir = path.join(process.cwd(), 'logs', 'transactions');
+
     if (!fs.existsSync(logsDir)) {
       fs.mkdirSync(logsDir, { recursive: true });
     }
+
     const filename = `tx-${Date.now()}-${circuitId}`;
     const filepath = path.join(logsDir, filename + '.bin');
     const filepathString = path.join(logsDir, filename + '.txt');
+
     fs.writeFileSync(filepath, serialized);
     fs.writeFileSync(filepathString, tx.toString());
+
     console.log(`Transaction serialized and written to: ${filepath}`);
+  } catch (error) {
+    console.error('Failed to write debug transaction logs:', error instanceof Error ? error.message : String(error));
   }
 }
 
@@ -134,7 +151,9 @@ export const submitTx = async <C extends Contract, ICK extends ImpureCircuitId<C
   const recipe = await providers.walletProvider.balanceTx(options.unprovenTx, options.newCoins);
   const toSubmit = await proveTransaction(recipe, providers, proveTxConfig);
   const bound = toSubmit.bind();
-  logAndCheckTransaction(options.circuitId, bound);
+  if (__DEBUG__) {
+    logTransaction(options.circuitId, bound);
+  }
   const txId = await providers.midnightProvider.submitTx(bound);
   return await providers.publicDataProvider.watchForTxData(txId);
 };
