@@ -1,3 +1,19 @@
+## 3.0.0-alpha.7 (2025-11-28)
+
+* feat: add testkit-js password handling ([0e293a9](https://github.com/midnight-ntwrk/artifacts/commit/0e293a9))
+* feat: async submit tx and call (#348) ([a37e96f](https://github.com/midnight-ntwrk/artifacts/commit/a37e96f)), closes [#348](https://github.com/midnight-ntwrk/artifacts/issues/348)
+* feat: encrypt storage ([ae863fe](https://github.com/midnight-ntwrk/artifacts/commit/ae863fe))
+* feat: encrypt storage ([420a64d](https://github.com/midnight-ntwrk/artifacts/commit/420a64d))
+* feat: remove debug code on build on CI ([082f1db](https://github.com/midnight-ntwrk/artifacts/commit/082f1db))
+* chore: add 'release' to commitlint configuration ([d48f6c6](https://github.com/midnight-ntwrk/artifacts/commit/d48f6c6))
+* chore: update build script to copy run-compactc.cjs to dist and remove it from files ([96e8187](https://github.com/midnight-ntwrk/artifacts/commit/96e8187))
+* chore: update license to Apache-2.0 and adjust run-compactc path in package.json ([adf794d](https://github.com/midnight-ntwrk/artifacts/commit/adf794d))
+* chore: update run-compactc path in yarn.lock to point to dist ([05eb923](https://github.com/midnight-ntwrk/artifacts/commit/05eb923))
+* chore(docs): unify commit message format for API documentation updates ([96b8504](https://github.com/midnight-ntwrk/artifacts/commit/96b8504))
+* chore(docs): unify commit message format for API documentation updates ([6a3e6c0](https://github.com/midnight-ntwrk/artifacts/commit/6a3e6c0))
+
+
+
 ## 3.0.0-alpha.6 (2025-11-26)
 
 * fix: cleaner types in wallet provider (#346) ([e08e655](https://github.com/midnight-ntwrk/artifacts/commit/e08e655)), closes [#346](https://github.com/midnight-ntwrk/artifacts/issues/346)
