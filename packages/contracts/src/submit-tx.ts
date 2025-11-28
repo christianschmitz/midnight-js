@@ -131,6 +131,22 @@ async function proveTransaction<C extends Contract, ICK extends ImpureCircuitId<
   return toSubmit;
 }
 
+async function submitTxCore<C extends Contract, ICK extends ImpureCircuitId<C>>(
+  providers: SubmitTxProviders<C, ICK>,
+  options: SubmitTxOptions<ICK>
+): Promise<string> {
+  const proveTxConfig = options.circuitId
+    ? { zkConfig: await providers.zkConfigProvider.get(options.circuitId) }
+    : undefined;
+  const recipe = await providers.walletProvider.balanceTx(options.unprovenTx, options.newCoins);
+  const toSubmit = await proveTransaction(recipe, providers, proveTxConfig);
+  const bound = toSubmit.bind();
+  if (__DEBUG__) {
+    logTransaction(options.circuitId, bound);
+  }
+  return providers.midnightProvider.submitTx(bound);
+}
+
 /**
  * Proves, balances, and submits an unproven deployment or call transaction using
  * the given providers, according to the given options.
@@ -145,15 +161,25 @@ export const submitTx = async <C extends Contract, ICK extends ImpureCircuitId<C
   providers: SubmitTxProviders<C, ICK>,
   options: SubmitTxOptions<ICK>
 ): Promise<FinalizedTxData> => {
-  const proveTxConfig = options.circuitId
-    ? { zkConfig: await providers.zkConfigProvider.get(options.circuitId) }
-    : undefined;
-  const recipe = await providers.walletProvider.balanceTx(options.unprovenTx, options.newCoins);
-  const toSubmit = await proveTransaction(recipe, providers, proveTxConfig);
-  const bound = toSubmit.bind();
-  if (__DEBUG__) {
-    logTransaction(options.circuitId, bound);
-  }
-  const txId = await providers.midnightProvider.submitTx(bound);
-  return await providers.publicDataProvider.watchForTxData(txId);
+  const txId = await submitTxCore(providers, options);
+  return providers.publicDataProvider.watchForTxData(txId);
+};
+
+/**
+ * Proves, balances, and submits an unproven deployment or call transaction using
+ * the given providers, according to the given options. Unlike {@link submitTx},
+ * this function returns immediately after submission without waiting for finalization.
+ *
+ * @param providers The providers used to manage the transaction lifecycle.
+ * @param options Configuration.
+ *
+ * @returns A promise that resolves with the transaction ID immediately after submission,
+ *          or rejects if an error occurs during preparation or submission.
+ *          To watch for finalization, use providers.publicDataProvider.watchForTxData(txId).
+ */
+export const submitTxAsync = async <C extends Contract, ICK extends ImpureCircuitId<C>>(
+  providers: SubmitTxProviders<C, ICK>,
+  options: SubmitTxOptions<ICK>
+): Promise<string> => {
+  return submitTxCore(providers, options);
 };
