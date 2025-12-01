@@ -1,3 +1,9 @@
+## 3.0.0-alpha.8 (2025-12-01)
+
+* feat: move @midnight-ntwrk/midnight-js-compact to devDependencies (#361) ([625854b](https://github.com/midnight-ntwrk/artifacts/commit/625854b)), closes [#361](https://github.com/midnight-ntwrk/artifacts/issues/361)
+
+
+
 ## 3.0.0-alpha.7 (2025-11-28)
 
 * feat: add testkit-js password handling ([0e293a9](https://github.com/midnight-ntwrk/artifacts/commit/0e293a9))
