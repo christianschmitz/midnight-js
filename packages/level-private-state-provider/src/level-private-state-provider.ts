@@ -213,15 +213,22 @@ export const levelPrivateStateProvider = <PSI extends PrivateStateId, PS = any>(
 ): PrivateStateProvider<PSI, PS> => {
   const fullConfig = _.defaults(config, DEFAULT_CONFIG);
 
-  const passwordProvider: PrivateStoragePasswordProvider = config.privateStoragePasswordProvider || (() => {
-    if (!config.walletProvider) {
-      throw new Error(
-        'Either privateStoragePasswordProvider or walletProvider must be provided.\n' +
-        'Provide walletProvider to use wallet encryption key, or privateStoragePasswordProvider for custom password.'
-      );
-    }
-    return config.walletProvider.getEncryptionPublicKey();
-  });
+  if (config.privateStoragePasswordProvider && config.walletProvider) {
+    throw new Error(
+      'Cannot provide both privateStoragePasswordProvider and walletProvider.\n' +
+      'Provide only one: walletProvider for default behavior, or privateStoragePasswordProvider for custom password.'
+    );
+  }
+
+  if (!config.privateStoragePasswordProvider && !config.walletProvider) {
+    throw new Error(
+      'Either privateStoragePasswordProvider or walletProvider must be provided.\n' +
+      'Provide walletProvider to use wallet encryption key, or privateStoragePasswordProvider for custom password.'
+    );
+  }
+
+  const passwordProvider: PrivateStoragePasswordProvider = config.privateStoragePasswordProvider ||
+    (() => config.walletProvider!.getEncryptionPublicKey());
 
   return {
     get(privateStateId: PSI): Promise<PS | null> {
