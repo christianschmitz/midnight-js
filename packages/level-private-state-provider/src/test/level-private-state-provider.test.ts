@@ -17,11 +17,10 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
 import { type ContractAddress, sampleSigningKey } from '@midnight-ntwrk/compact-runtime';
+import { type UnprovenTransaction } from '@midnight-ntwrk/ledger-v6';
 import * as crypto from 'crypto';
 
 import { levelPrivateStateProvider } from '../index';
-import { Bindingish, Proofish, Signaturish, Transaction, UnprovenTransaction } from '@midnight-ntwrk/ledger-v6';
-import { unknown } from 'io-ts';
 
 describe('Level Private State Provider', (): void => {
   const TEST_PASSWORD = 'test-storage-password-for-unit-tests-only';
