@@ -20,6 +20,8 @@ import { type ContractAddress, sampleSigningKey } from '@midnight-ntwrk/compact-
 import * as crypto from 'crypto';
 
 import { levelPrivateStateProvider } from '../index';
+import { Bindingish, Proofish, Signaturish, Transaction, UnprovenTransaction } from '@midnight-ntwrk/ledger-v6';
+import { unknown } from 'io-ts';
 
 describe('Level Private State Provider', (): void => {
   const TEST_PASSWORD = 'test-storage-password-for-unit-tests-only';
@@ -232,7 +234,7 @@ describe('Level Private State Provider', (): void => {
       const mockWallet = {
         getEncryptionPublicKey: () => TEST_PASSWORD,
         getCoinPublicKey: () => 'mock-coin-public-key',
-        balanceTx: async () => ({ type: 'NothingToProve' as const, transaction: {} as any })
+        balanceTx: async () => ({ type: 'NothingToProve' as const, transaction: {} as unknown as UnprovenTransaction })
       };
 
       const db = levelPrivateStateProvider<PID, PS>({ walletProvider: mockWallet });
@@ -251,7 +253,7 @@ describe('Level Private State Provider', (): void => {
       const mockWallet = {
         getEncryptionPublicKey: () => TEST_PASSWORD,
         getCoinPublicKey: () => 'mock-coin-public-key',
-        balanceTx: async () => ({ type: 'NothingToProve' as const, transaction: {} as any })
+        balanceTx: async () => ({ type: 'NothingToProve' as const, transaction: {} as unknown as UnprovenTransaction})
       };
 
       expect(() => {
