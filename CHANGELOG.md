@@ -2,19 +2,28 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
-## [3.0.0-alpha.13](https://github.com/midnightntwrk/midnight-js/compare/v3.0.0-alpha.12...v3.0.0-alpha.13) (2026-01-08)
+## [3.0.0-alpha.14](https://github.com/midnightntwrk/midnight-js/compare/v3.0.0-alpha.12...v3.0.0-alpha.14) (2026-01-13)
+
+
+### Features
+
+* ledger v7 support ([#414](https://github.com/midnightntwrk/midnight-js/pull/414)) ([1f6f04f](https://github.com/midnightntwrk/midnight-js/commit/1f6f04f5726cc7a65b010943c164b1041b37c38d))
 
 
 ### Documentation
 
 * API documentation update ([#417](https://github.com/midnightntwrk/midnight-js/pull/417)) ([082c77a](https://github.com/midnightntwrk/midnight-js/commit/082c77a5b3d318585919cbc1daacfbbf4a8e331d))
+* API documentation update ([#420](https://github.com/midnightntwrk/midnight-js/pull/420)) ([0c9e4d7](https://github.com/midnightntwrk/midnight-js/commit/0c9e4d74d248b6200c899d1c3d05be0aa97a4a6b))
+* API documentation update ([#425](https://github.com/midnightntwrk/midnight-js/pull/425)) ([fa49615](https://github.com/midnightntwrk/midnight-js/commit/fa49615e25c869e006f7129373a2bd332549604b))
 
 
 ### Improvements
 
+* add workflow to fix release tags on main branch after PR merge ([#423](https://github.com/midnightntwrk/midnight-js/pull/423)) ([6f88a4f](https://github.com/midnightntwrk/midnight-js/commit/6f88a4f57a0e329818109e94a641a9f63ed5ae1c))
 * **deps:** update dependency express to v5.2.0 [security] ([#363](https://github.com/midnightntwrk/midnight-js/pull/363)) ([e7bab3d](https://github.com/midnightntwrk/midnight-js/commit/e7bab3d028001c03b69582869daed6577bb45fcb))
+* **deps:** update dependency typescript-eslint to v8.48.0 ([#339](https://github.com/midnightntwrk/midnight-js/pull/339)) ([b6aae43](https://github.com/midnightntwrk/midnight-js/commit/b6aae43dedfdd3e3d09fabb2702d64c945577be9))
 * **release:** bump version to 3.0.0-alpha.13 ([#419](https://github.com/midnightntwrk/midnight-js/pull/419)) ([f463218](https://github.com/midnightntwrk/midnight-js/commit/f463218aa131bc32f8a2fe8816d7b7b23fda5b9a))
-* update changelog generation commands and improve release configuration ([c1b6d50](https://github.com/midnightntwrk/midnight-js/commit/c1b6d50c237ba81e1c923623db3375975bc33c42))
+* update changelog generation commands + improve release configuration ([#421](https://github.com/midnightntwrk/midnight-js/pull/421)) ([36a36e3](https://github.com/midnightntwrk/midnight-js/commit/36a36e3c52e651f05103650887feb63d53c84995))
 
 ## [3.0.0-alpha.12](https://github.com/midnightntwrk/midnight-js/compare/v3.0.0-alpha.11...v3.0.0-alpha.12) (2026-01-07)
 
