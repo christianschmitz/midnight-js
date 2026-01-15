@@ -24,7 +24,6 @@ import type { EnvironmentConfiguration, MidnightWalletProvider, TestEnvironment 
 import { createLogger, getTestEnvironment, initializeMidnightProviders } from '@midnight-ntwrk/testkit-js';
 import path from 'path';
 
-import { INVALID_CONTRACT_ADDRESS_TOO_LONG } from '@/constants';
 import * as api from '@/double-counter-api';
 import { CounterConfiguration } from '@/double-counter-api';
 import {
@@ -183,6 +182,7 @@ describe('Scoped Transaction Contract Tests', () => {
   });
 
   it('should not submit scoped transaction when one circuit call fails [@slow]', async () => {
+    const aboveMaxValue = 65535n + 1n;
     const counterValue1 = await api.getCounterLedgerState(providers, contractAddress);
     expect(counterValue1?.at(0)).toBeDefined();
 
@@ -199,10 +199,10 @@ describe('Scoped Transaction Contract Tests', () => {
 
     const invalidCallTxOptions: CallTxOptionsWithPrivateStateId<DoubleCounterContract, 'increment1'> = {
       contract: api.doubleCounterContractInstance,
-      contractAddress: INVALID_CONTRACT_ADDRESS_TOO_LONG,
+      contractAddress: contractAddress,
       circuitId: 'increment1',
       privateStateId: CounterPrivateStateId,
-      args: [1n] as [bigint]
+      args: [aboveMaxValue] as [bigint]
     };
 
     await expect(
@@ -210,7 +210,9 @@ describe('Scoped Transaction Contract Tests', () => {
         await submitCallTx(providers, callTxOptions, txCtx);
         await submitCallTx(providers, invalidCallTxOptions, txCtx);
       })
-    ).rejects.toThrow('Expected an input string with byte length of 32, got 33.');
+    ).rejects.toThrow(
+      "Unexpected error executing scoped transaction '<unnamed>': Error: Unexpected error executing scoped transaction '<unnamed>': CompactError: type error: increment1 argument 1 (argument 2 as invoked from Typescript) at double-counter.compact line 8 char 1; expected value of type Uint<0..65536> but received 65536n"
+    );
 
     const counterValue2 = await api.getCounterLedgerState(providers, contractAddress);
     expect(counterValue2).toBeDefined();
