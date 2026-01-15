@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-
-
 import { type ContractAddress } from '@midnight-ntwrk/ledger-v7';
 import {
   type CallTxOptionsWithPrivateStateId,
@@ -22,16 +20,11 @@ import {
   submitCallTx,
   withContractScopedTransaction
 } from '@midnight-ntwrk/midnight-js-contracts';
-import type {
-  EnvironmentConfiguration,
-  MidnightWalletProvider,
-  TestEnvironment} from '@midnight-ntwrk/testkit-js';
-import {
-  createLogger,
-  getTestEnvironment,
-  initializeMidnightProviders} from '@midnight-ntwrk/testkit-js';
+import type { EnvironmentConfiguration, MidnightWalletProvider, TestEnvironment } from '@midnight-ntwrk/testkit-js';
+import { createLogger, getTestEnvironment, initializeMidnightProviders } from '@midnight-ntwrk/testkit-js';
 import path from 'path';
 
+import { INVALID_CONTRACT_ADDRESS_TOO_LONG } from '@/constants';
 import * as api from '@/double-counter-api';
 import { CounterConfiguration } from '@/double-counter-api';
 import {
@@ -93,13 +86,10 @@ describe('Scoped Transaction Contract Tests', () => {
       privateStateId: CounterPrivateStateId,
       args: [1n] as [bigint]
     };
-    const callTxData = await withContractScopedTransaction<DoubleCounterContract>(
-      providers,
-      async (txCtx) => {
-        await submitCallTx(providers, callTxOptions, txCtx);
-        await submitCallTx(providers, callTxOptions, txCtx);
-      }
-    );
+    const callTxData = await withContractScopedTransaction<DoubleCounterContract>(providers, async (txCtx) => {
+      await submitCallTx(providers, callTxOptions, txCtx);
+      await submitCallTx(providers, callTxOptions, txCtx);
+    });
     expect(callTxData.private.nextPrivateState.privateCounter).toEqual(privateState1!.privateCounter + 2);
 
     const counterValue2 = await api.getCounterLedgerState(providers, contractAddress);
@@ -168,7 +158,7 @@ describe('Scoped Transaction Contract Tests', () => {
       circuitId: 'increment2',
       privateStateId: CounterPrivateStateId,
       args: [1n] as [bigint]
-     };
+    };
     const callTxOptions2: CallTxOptionsWithPrivateStateId<DoubleCounterContract, 'reset'> = {
       contract: api.doubleCounterContractInstance,
       contractAddress,
@@ -190,5 +180,45 @@ describe('Scoped Transaction Contract Tests', () => {
     const counterPS = await api.getCounterPrivateState(providers, CounterPrivateStateId);
     expect(counterPS).toBeDefined();
     expect(counterPS!.privateCounter).toEqual(privateState1!.privateCounter + 2);
+  });
+
+  it('should not submit scoped transaction when one circuit call fails [@slow]', async () => {
+    const counterValue1 = await api.getCounterLedgerState(providers, contractAddress);
+    expect(counterValue1?.at(0)).toBeDefined();
+
+    const privateState1 = await api.getCounterPrivateState(providers, CounterPrivateStateId);
+    expect(privateState1).toBeDefined();
+
+    const callTxOptions: CallTxOptionsWithPrivateStateId<DoubleCounterContract, 'increment1'> = {
+      contract: api.doubleCounterContractInstance,
+      contractAddress,
+      circuitId: 'increment1',
+      privateStateId: CounterPrivateStateId,
+      args: [1n] as [bigint]
+    };
+
+    const invalidCallTxOptions: CallTxOptionsWithPrivateStateId<DoubleCounterContract, 'increment1'> = {
+      contract: api.doubleCounterContractInstance,
+      contractAddress: INVALID_CONTRACT_ADDRESS_TOO_LONG,
+      circuitId: 'increment1',
+      privateStateId: CounterPrivateStateId,
+      args: [1n] as [bigint]
+    };
+
+    await expect(
+      withContractScopedTransaction<DoubleCounterContract>(providers, async (txCtx) => {
+        await submitCallTx(providers, callTxOptions, txCtx);
+        await submitCallTx(providers, invalidCallTxOptions, txCtx);
+      })
+    ).rejects.toThrow('Expected an input string with byte length of 32, got 33.');
+
+    const counterValue2 = await api.getCounterLedgerState(providers, contractAddress);
+    expect(counterValue2).toBeDefined();
+    const ticker1 = counterValue1?.at(0);
+    expect(counterValue2!.at(0)).toEqual(ticker1);
+
+    const counterPS = await api.getCounterPrivateState(providers, CounterPrivateStateId);
+    expect(counterPS).toBeDefined();
+    expect(counterPS!.privateCounter).toEqual(privateState1!.privateCounter);
   });
 });
