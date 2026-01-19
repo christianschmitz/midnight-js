@@ -180,7 +180,7 @@ describe('Unshielded tokens', () => {
     ).rejects.toThrow('Insufficient Funds: could not balance 0101010101010101010101010101010101010101010101010101010101010101');
   });
 
-  test.skip('should receive tokens - wallet', async () => {
+  test('should receive tokens - wallet', async () => {
     const sep = new Uint8Array(32).fill(0);
 
     const txData = await submitCallTx(providers, {
@@ -191,13 +191,13 @@ describe('Unshielded tokens', () => {
     });
 
     expect(txData.public.status).toBe(SucceedEntirely);
-    expect(txData.private.result).toEqual(0n);
+    expect(txData.private.result).toEqual([]);
     expect(txData.public.unshielded).toBeDefined();
 
     const spent = txData.public.unshielded.spent;
     const created = txData.public.unshielded.created;
-    expect(spent.length).toEqual(0);
-    expect(created.length).toEqual(0);
+    expect(spent.length).toEqual(1);
+    expect(created.length).toEqual(1);
   });
 
   test.skip('should send tokens to wallet', async () => {

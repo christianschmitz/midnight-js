@@ -25,12 +25,18 @@ import {
   ZswapSecretKeys
 } from '@midnight-ntwrk/ledger-v7';
 import {
+  BALANCE_TRANSACTION_TO_PROVE,
   type BalancedProvingRecipe,
+  type BalanceTransactionToProve,
   type MidnightProvider,
+  NOTHING_TO_PROVE,
+  type NothingToProve,
+  TRANSACTION_TO_PROVE,
   type WalletProvider
 } from '@midnight-ntwrk/midnight-js-types';
 import { ttlOneHour } from '@midnight-ntwrk/midnight-js-utils';
 import { type WalletFacade } from '@midnight-ntwrk/wallet-sdk-facade';
+import { type UnshieldedKeystore } from '@midnight-ntwrk/wallet-sdk-unshielded-wallet';
 import type { Logger } from 'pino';
 
 import { type EnvironmentConfiguration } from '@/index';
@@ -46,6 +52,7 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
   logger: Logger;
   readonly env: EnvironmentConfiguration;
   readonly wallet: WalletFacade;
+  readonly unshieldedKeystore: UnshieldedKeystore;
   readonly zswapSecretKeys: ZswapSecretKeys;
   readonly dustSecretKey: DustSecretKey;
 
@@ -54,13 +61,15 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
     environmentConfiguration: EnvironmentConfiguration,
     wallet: WalletFacade,
     zswapSecretKeys: ZswapSecretKeys,
-    dustSecretKey: DustSecretKey
+    dustSecretKey: DustSecretKey,
+    unshieldedKeystore: UnshieldedKeystore
   ) {
     this.logger = logger;
     this.env = environmentConfiguration;
     this.wallet = wallet;
     this.zswapSecretKeys = zswapSecretKeys;
     this.dustSecretKey = dustSecretKey;
+    this.unshieldedKeystore = unshieldedKeystore;
   }
 
   getCoinPublicKey(): CoinPublicKey {
@@ -71,13 +80,48 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
     return this.zswapSecretKeys.encryptionPublicKey;
   }
 
+  async signTx(recipe: BalancedProvingRecipe): Promise<BalancedProvingRecipe> {
+    switch (recipe.type) {
+      case TRANSACTION_TO_PROVE: {
+        return {
+          ...recipe,
+          transaction: await this.wallet.signTransaction(recipe.transaction, (payload) => this.unshieldedKeystore.signData(payload))
+        }
+      }
+
+      case BALANCE_TRANSACTION_TO_PROVE: {
+        const recipeBalance = recipe as BalanceTransactionToProve<UnprovenTransaction>;
+        const merged = recipeBalance.transactionToBalance.merge(recipeBalance.transactionToProve);
+        return {
+          type: TRANSACTION_TO_PROVE,
+          transaction: await this.wallet.signTransaction(merged, (payload) => this.unshieldedKeystore.signData(payload))
+        }
+      }
+
+      case NOTHING_TO_PROVE: {
+        return {
+          ...recipe,
+          transaction: await this.wallet.signTransaction(
+            (recipe as NothingToProve<UnprovenTransaction>).transaction,
+            (payload) => this.unshieldedKeystore.signData(payload)
+          )
+        }
+      }
+
+      default:
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        throw new Error(`Unknown recipe type: ${(recipe as any).type}`);
+    }
+  }
+
   async balanceTx(
     tx: UnprovenTransaction,
     _newCoins: ShieldedCoinInfo[],
     ttl: Date = ttlOneHour()
   ): Promise<BalancedProvingRecipe> {
-    return this.wallet.balanceTransaction(this.zswapSecretKeys, this.dustSecretKey, tx, ttl);
-  }
+    return await this.wallet.balanceTransaction(this.zswapSecretKeys, this.dustSecretKey, tx, ttl).then(
+      (r) => this.signTx(r));
+  };
 
   submitTx(tx: FinalizedTransaction): Promise<string> {
     return this.wallet.submitTransaction(tx);
@@ -102,19 +146,22 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
     seed?: string | undefined
   ): Promise<MidnightWalletProvider> {
     const builder = FluentWalletBuilder.forEnvironment(env);
-    const { wallet, seeds } = seed
+    const { wallet, seeds, keystore } = seed
       ? await builder.withSeed(seed).buildWithoutStarting()
       : await builder.withRandomSeed().buildWithoutStarting();
 
     const initialState = await getInitialShieldedState(wallet.shielded);
-    logger.info(`Your wallet seed is: ${seeds.masterSeed} and your address is: ${initialState.address.coinPublicKeyString()}`);
+    logger.info(
+      `Your wallet seed is: ${seeds.masterSeed} and your address is: ${initialState.address.coinPublicKeyString()}`
+    );
 
     return new MidnightWalletProvider(
       logger,
       env,
       wallet,
       ZswapSecretKeys.fromSeed(seeds.shielded),
-      DustSecretKey.fromSeed(seeds.dust)
+      DustSecretKey.fromSeed(seeds.dust),
+      keystore
     );
   }
 
@@ -123,8 +170,9 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
     env: EnvironmentConfiguration,
     wallet: WalletFacade,
     zswapSecretKeys: ZswapSecretKeys,
-    dustSecretKey: DustSecretKey
+    dustSecretKey: DustSecretKey,
+    unshieldedKeystore: UnshieldedKeystore
   ): Promise<MidnightWalletProvider> {
-    return new MidnightWalletProvider(logger, env, wallet, zswapSecretKeys, dustSecretKey);
+    return new MidnightWalletProvider(logger, env, wallet, zswapSecretKeys, dustSecretKey, unshieldedKeystore);
   }
 }
