@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+import type { Contract } from '@midnight-ntwrk/compact-js';
 import { type ShieldedCoinInfo } from '@midnight-ntwrk/ledger-v7';
-import type { ImpureCircuitId } from '@midnight-ntwrk/midnight-js-types';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { submitTx, submitTxAsync, type SubmitTxOptions } from '../submit-tx';
@@ -48,7 +48,7 @@ describe('submit-tx', () => {
         mockProviders.midnightProvider.submitTx = vi.fn().mockResolvedValue('test-tx-id');
         mockProviders.publicDataProvider.watchForTxData = vi.fn().mockResolvedValue(mockFinalizedTxData);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
         };
 
@@ -62,7 +62,7 @@ describe('submit-tx', () => {
       });
 
       it('should successfully submit transaction with circuit ID', async () => {
-        const circuitId = 'testCircuit' as ImpureCircuitId;
+        const circuitId = 'testCircuit' as Contract.ImpureCircuitId<Contract.Any>;
         const mockFinalizedTxData = createMockFinalizedTxData();
 
         mockProviders.walletProvider.balanceTx = vi.fn().mockResolvedValue(mockProvenTx);
@@ -70,7 +70,7 @@ describe('submit-tx', () => {
         mockProviders.midnightProvider.submitTx = vi.fn().mockResolvedValue('test-tx-id');
         mockProviders.publicDataProvider.watchForTxData = vi.fn().mockResolvedValue(mockFinalizedTxData);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
           circuitId
         };
@@ -106,7 +106,7 @@ describe('submit-tx', () => {
         mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.midnightProvider.submitTx = vi.fn().mockResolvedValue(expectedTxId);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
         };
 
@@ -120,14 +120,14 @@ describe('submit-tx', () => {
       });
 
       it('should submit transaction with circuit ID and return txId', async () => {
-        const circuitId = 'testCircuit' as ImpureCircuitId;
+        const circuitId = 'testCircuit' as Contract.ImpureCircuitId<Contract.Any>;
         const expectedTxId = 'test-tx-id-with-circuit';
 
         mockProviders.walletProvider.balanceTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.midnightProvider.submitTx = vi.fn().mockResolvedValue(expectedTxId);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
           circuitId
         };
@@ -149,7 +149,7 @@ describe('submit-tx', () => {
         mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.midnightProvider.submitTx = vi.fn().mockResolvedValue(expectedTxId);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
           newCoins: mockNewCoins
         };
@@ -168,7 +168,7 @@ describe('submit-tx', () => {
         mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.walletProvider.balanceTx = vi.fn().mockRejectedValue(balanceError);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
         };
 
@@ -183,7 +183,7 @@ describe('submit-tx', () => {
         mockProviders.walletProvider.balanceTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.proofProvider.proveTx = vi.fn().mockRejectedValue(proveError);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
         };
 
@@ -198,7 +198,7 @@ describe('submit-tx', () => {
         mockProviders.proofProvider.proveTx = vi.fn().mockResolvedValue(mockProvenTx);
         mockProviders.midnightProvider.submitTx = vi.fn().mockRejectedValue(submitError);
 
-        const options: SubmitTxOptions<ImpureCircuitId> = {
+        const options: SubmitTxOptions<Contract.ImpureCircuitId<Contract.Any>> = {
           unprovenTx: mockUnprovenTx,
         };
 
