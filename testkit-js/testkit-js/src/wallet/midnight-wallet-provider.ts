@@ -70,48 +70,15 @@ export class MidnightWalletProvider implements MidnightProvider, WalletProvider 
     return this.zswapSecretKeys.encryptionPublicKey;
   }
 
-  async signTx(recipe: BalancedProvingRecipe): Promise<BalancedProvingRecipe> {
-    switch (recipe.type) {
-      case TRANSACTION_TO_PROVE: {
-        return {
-          ...recipe,
-          transaction: await this.wallet.signTransaction(recipe.transaction, (payload) => this.unshieldedKeystore.signData(payload))
-        }
-      }
-
-      case BALANCE_TRANSACTION_TO_PROVE: {
-        const recipeBalance = recipe as BalanceTransactionToProve<UnprovenTransaction>;
-        const merged = recipeBalance.transactionToBalance.merge(recipeBalance.transactionToProve);
-        return {
-          type: TRANSACTION_TO_PROVE,
-          transaction: await this.wallet.signTransaction(merged, (payload) => this.unshieldedKeystore.signData(payload))
-        }
-      }
-
-      case NOTHING_TO_PROVE: {
-        return {
-          ...recipe,
-          transaction: await this.wallet.signTransaction(
-            (recipe as NothingToProve<UnprovenTransaction>).transaction,
-            (payload) => this.unshieldedKeystore.signData(payload)
-          )
-        }
-      }
-
-      default:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        throw new Error(`Unknown recipe type: ${(recipe as any).type}`);
-    }
-  }
-
   async balanceTx(
     tx: UnboundTransaction,
     _newCoins: ShieldedCoinInfo[],
     ttl: Date = ttlOneHour()
   ): Promise<FinalizedTransaction> {
     const bound = tx.bind();
-    const balancedRecipe = await this.wallet.balanceFinalizedTransaction(this.zswapSecretKeys, this.dustSecretKey, bound, ttl);
-    return this.wallet.finalizeRecipe(balancedRecipe);
+    const finalizedTransactionRecipe = await this.wallet.balanceFinalizedTransaction(this.zswapSecretKeys, this.dustSecretKey, bound, ttl);
+    finalizedTransactionRecipe.balancingTransaction = await this.wallet.signTransaction(finalizedTransactionRecipe.balancingTransaction, (payload) => this.unshieldedKeystore.signData(payload));
+    return this.wallet.finalizeRecipe(finalizedTransactionRecipe);
   }
 
   submitTx(tx: FinalizedTransaction): Promise<string> {
