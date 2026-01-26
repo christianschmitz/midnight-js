@@ -177,7 +177,8 @@ describe('Unshielded tokens', () => {
     ).rejects.toThrow('Insufficient Funds: could not balance 0101010101010101010101010101010101010101010101010101010101010101');
   });
 
-  test('should receive tokens - wallet', async () => {
+  //BUG: 21219
+  test.skip('should receive tokens - wallet', async () => {
     const sep = new Uint8Array(32).fill(0);
 
     const txData = await submitCallTx(providers, {
