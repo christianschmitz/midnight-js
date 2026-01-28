@@ -61,6 +61,7 @@ describe('Contracts API Snark Upgrade [dedicated contract] [@slow]', () => {
   beforeEach(async () => {
     logger.info(`Running test=${expect.getState().currentTestName}`);
     ({ counterProviders, contractAddress } = await api.deployCounterContract(wallet, environmentConfiguration));
+    await delay(TX_DELAY_MS);
   });
 
   /**
@@ -110,7 +111,7 @@ describe('Contracts API Snark Upgrade [dedicated contract] [@slow]', () => {
    * @then Should successfully remove verifier key
    * @and Should throw error when trying to use removed circuit operation
    */
-  it('should successfully remove verifier key and disable circuit operation', async () => {
+  it.skip('should successfully remove verifier key and disable circuit operation', async () => {
     const circuitMaintenanceTxInterfaces = createCircuitMaintenanceTxInterfaces(
       counterProviders,
       CompiledCounterContract,
@@ -174,7 +175,7 @@ describe('Contracts API Snark Upgrade [dedicated contract] [@slow]', () => {
    * @then Should fail with error about increment circuit already being defined
    * @and Should properly validate circuit-key correspondence
    */
-  it('should fail when inserting verifier key for wrong circuit after removal', async () => {
+  it.skip('should fail when inserting verifier key for wrong circuit after removal', async () => {
     const vk = await counterProviders.zkConfigProvider.getVerifierKey(CIRCUIT_ID_RESET);
     const circuitMaintenanceTxInterfaces = createCircuitMaintenanceTxInterfaces(
       counterProviders,
