@@ -117,21 +117,23 @@ const txId = await provider.submitTx(tx);
 
 ### After
 ```typescript
-// v3.0.0 - Integrated workflow with submitDeployTx/submitCallTx
-import { submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
+import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
 
-const result = await submitCallTx(providers, {
-  contract: myContract,
-  circuit: 'myCircuit',
-  args: [arg1, arg2]
+const deployed = await deployContract(providers, {
+  compiledContract: MyCompiledContract,
+  privateStateId: 'myState',
+  initialPrivateState: { ... }
 });
+
+// Call via deployed contract
+const result = await deployed.callTx.myCircuit(args);
 ```
 
 ### Migration Steps
-1. Use `submitDeployTx()` for contract deployment
-2. Use `submitCallTx()` for contract calls
-3. These functions handle proving internally
-4. No manual transaction creation needed
+1. Create `CompiledContract` using `make().pipe()` pattern
+2. Use `deployContract()` with `compiledContract` option
+3. Call circuits via `deployed.callTx.circuitName()`
+4. Proving is handled internally
 
 ---
 

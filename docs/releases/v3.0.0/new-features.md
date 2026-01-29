@@ -391,22 +391,19 @@ async function submitCallTx<C extends Contract, ICK extends ImpureCircuitId<C>>(
 
 ### Usage
 ```typescript
-import { submitDeployTx, submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
+import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
 
-// Deploy a contract
-const deployResult = await submitDeployTx(providers, {
-  contract: myContract,
-  initialState: { balance: 0n }
+// Deploy and get deployed contract interface
+const deployed = await deployContract(providers, {
+  compiledContract: MyCompiledContract,
+  privateStateId: 'myState',
+  initialPrivateState: { balance: 0n }
 });
 
-// Call a contract method
-const callResult = await submitCallTx(providers, {
-  contract: myContract,
-  circuit: 'transfer',
-  args: [fromAddress, toAddress, amount]
-});
+// Call via deployed contract
+const result = await deployed.callTx.transfer(fromAddress, toAddress, amount);
 
-console.log('Transaction ID:', callResult.txId);
+console.log('Transaction ID:', result.public.txId);
 ```
 
 ### Benefits
@@ -426,7 +423,6 @@ Configure transaction time-to-live via `balanceTx` for expiry management.
 interface WalletProvider {
   balanceTx(
     tx: UnboundTransaction,
-    newCoins?: ShieldedCoinInfo[],
     ttl?: Date  // Optional expiry time
   ): Promise<FinalizedTransaction>;
 }
@@ -437,7 +433,6 @@ interface WalletProvider {
 // Set 10-minute TTL
 const finalizedTx = await walletProvider.balanceTx(
   unboundTx,
-  newCoins,
   new Date(Date.now() + 10 * 60 * 1000) // 10 minutes from now
 );
 

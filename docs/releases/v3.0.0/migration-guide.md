@@ -190,22 +190,17 @@ const txId = await provider.submitTx(tx);
 
 #### v3.0.0
 ```typescript
-// Use submitDeployTx for deployments
-import { submitDeployTx } from '@midnight-ntwrk/midnight-js-contracts';
+// Use deployContract with compiledContract
+import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
 
-const result = await submitDeployTx(providers, {
-  contract: myContract,
-  initialState: { /* ... */ }
+const deployed = await deployContract(providers, {
+  compiledContract: MyCompiledContract,
+  privateStateId: 'myState',
+  initialPrivateState: { ... }
 });
 
-// Use submitCallTx for contract calls
-import { submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
-
-const result = await submitCallTx(providers, {
-  contract: myContract,
-  circuit: 'myCircuit',
-  args: [arg1, arg2]
-});
+// Call via deployed contract
+const result = await deployed.callTx.myCircuit(arg1, arg2);
 ```
 
 ### Step 9: Update networkId Usage (#125)

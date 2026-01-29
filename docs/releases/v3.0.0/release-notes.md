@@ -50,17 +50,18 @@ const txId = await midnightProvider.submitTx(tx);
 ```
 
 ### Transaction Workflow (#125)
-Use high-level submission functions for better workflow.
+Use `deployContract` with `compiledContract` for deployment.
 
 ```typescript
-// v3.0.0 - Use submitDeployTx or submitCallTx
-import { submitCallTx } from '@midnight-ntwrk/midnight-js-contracts';
+import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
 
-const result = await submitCallTx(providers, {
-  contract: myContract,
-  circuit: 'myCircuit',
-  args: [arg1, arg2]
+const deployed = await deployContract(providers, {
+  compiledContract: MyCompiledContract,
+  privateStateId: 'myState',
+  initialPrivateState: { ... }
 });
+
+const result = await deployed.callTx.myCircuit(args);
 ```
 
 ### ZswapOffer Return Type (#125)
@@ -164,9 +165,8 @@ const balances = await provider.queryUnshieldedBalances(contractAddress);
 Configure transaction time-to-live via `balanceTx`.
 
 ```typescript
-const recipe = await walletProvider.balanceTx(
-  unprovenTx,
-  newCoins,
+const finalizedTx = await walletProvider.balanceTx(
+  unboundTx,
   new Date(Date.now() + 10 * 60 * 1000) // 10 min TTL
 );
 ```
