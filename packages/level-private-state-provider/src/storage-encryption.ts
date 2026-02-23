@@ -274,3 +274,20 @@ export const getPasswordFromProvider = async (provider: PrivateStoragePasswordPr
   validatePassword(password);
   return password;
 };
+
+export const decryptValue = (
+  encryptedValue: string,
+  encryption: StorageEncryption,
+  password: string
+): string => {
+  if (!StorageEncryption.isEncrypted(encryptedValue)) {
+    console.debug('MIDNIGHT: Encountered unencrypted data during decryption - passing through as-is');
+    return encryptedValue;
+  }
+
+  const version = StorageEncryption.getVersion(encryptedValue);
+  if (version === 1) {
+    return encryption.decryptWithPassword(encryptedValue, password);
+  }
+  return encryption.decrypt(encryptedValue);
+};
