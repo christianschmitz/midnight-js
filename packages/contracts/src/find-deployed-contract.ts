@@ -21,6 +21,7 @@ import {
   type SigningKey
 } from '@midnight-ntwrk/compact-runtime';
 import {
+  type AnyProvableCircuitId,
   type PrivateStateId,
   type PrivateStateProvider,
   type VerifierKey} from '@midnight-ntwrk/midnight-js-types';
@@ -115,7 +116,7 @@ export const verifierKeysEqual = (a: Uint8Array, b: Uint8Array): boolean =>
  * @throws ContractTypeError When one or more of the local and deployed verifier keys do not match.
  */
 export const verifyContractState = (
-  verifierKeys: [Contract.ImpureCircuitId<Contract.Any>, VerifierKey][],
+  verifierKeys: [AnyProvableCircuitId, VerifierKey][],
   contractState: ContractState
 ): void => {
   const mismatchedCircuitIds = verifierKeys.reduce(
@@ -218,7 +219,7 @@ export type FoundContract<C extends Contract.Any> = {
 }
 
 export async function findDeployedContract<C extends Contract<undefined>>(
-  providers: ContractProviders<C, Contract.ImpureCircuitId<C>, unknown>,
+  providers: ContractProviders<C, Contract.ProvableCircuitId<C>, unknown>,
   options: FindDeployedContractOptionsBase<C>
 ): Promise<FoundContract<C>>;
 
@@ -266,7 +267,7 @@ export async function findDeployedContract<C extends Contract.Any>(
   assertDefined(currentContractState, `No contract deployed at contract address '${contractAddress}'`);
 
   const verifierKeys = await providers.zkConfigProvider.getVerifierKeys(
-    ContractExecutable.make(compiledContract).getImpureCircuitIds()
+    ContractExecutable.make(compiledContract).getProvableCircuitIds()
   );
   verifyContractState(verifierKeys, currentContractState);
 

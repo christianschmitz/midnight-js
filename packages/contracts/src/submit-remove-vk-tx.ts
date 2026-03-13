@@ -15,7 +15,7 @@
 
 import type { CompiledContract } from '@midnight-ntwrk/compact-js';
 import type { Contract } from '@midnight-ntwrk/compact-js/effect/Contract';
-import type { ContractAddress } from '@midnight-ntwrk/ledger-v7';
+import type { ContractAddress } from '@midnight-ntwrk/ledger-v8';
 import { type FinalizedTxData,SucceedEntirely } from '@midnight-ntwrk/midnight-js-types';
 import { assertDefined, assertIsContractAddress } from '@midnight-ntwrk/midnight-js-utils';
 
@@ -70,7 +70,7 @@ export const submitRemoveVerifierKeyTx = async <C extends Contract.Any>(
   providers: ContractProviders,
   compiledContract: CompiledContract.CompiledContract<C, any>, // eslint-disable-line @typescript-eslint/no-explicit-any
   contractAddress: ContractAddress,
-  circuitId: Contract.ImpureCircuitId<C>
+  circuitId: Contract.ProvableCircuitId<C>
 ): Promise<FinalizedTxData> => {
   assertIsContractAddress(contractAddress);
   const contractState = await providers.publicDataProvider.queryContractState(contractAddress);
@@ -84,9 +84,9 @@ export const submitRemoveVerifierKeyTx = async <C extends Contract.Any>(
   const unprovenTx = await createUnprovenRemoveVerifierKeyTx(
     providers.zkConfigProvider,
     compiledContract,
-    contractAddress, 
-    circuitId, 
-    contractState, 
+    contractAddress,
+    circuitId,
+    contractState,
     signingKey,
     providers.walletProvider.getCoinPublicKey()
   );

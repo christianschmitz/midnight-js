@@ -14,7 +14,7 @@
  */
 
 import { type CompiledContract, ContractExecutable } from '@midnight-ntwrk/compact-js';
-import { type Contract, ImpureCircuitId, VerifierKey as ContractVerifierKey } from '@midnight-ntwrk/compact-js/effect/Contract';
+import { type Contract, ProvableCircuitId, VerifierKey as ContractVerifierKey } from '@midnight-ntwrk/compact-js/effect/Contract';
 import {
   type AlignedValue,
   type CoinPublicKey,
@@ -40,9 +40,10 @@ import {
   UnshieldedOffer,
   type UtxoOutput,
   type ZswapChainState
-} from '@midnight-ntwrk/ledger-v7';
+} from '@midnight-ntwrk/ledger-v8';
 import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import {
+  type AnyProvableCircuitId,
   asContractAddress,
   asEffectOption,
   makeContractExecutableRuntime,
@@ -114,7 +115,7 @@ export const createUnprovenLedgerDeployTx = (
 }
 
 export const createUnprovenLedgerCallTx = (
-  circuitId: Contract.ImpureCircuitId<Contract.Any>,
+  circuitId: AnyProvableCircuitId,
   contractAddress: ContractAddress,
   initialContractState: ContractState,
   zswapChainState: ZswapChainState,
@@ -224,7 +225,7 @@ export const createUnprovenRemoveVerifierKeyTx = <C extends Contract.Any>(
 
   return unprovenTxFromContractUpdates(async () => {
     return (await contractRuntime.runPromise(contractExec.removeContractOperation(
-      ImpureCircuitId(operation),
+      ProvableCircuitId(operation),
       {
         address: asContractAddress(contractAddress),
         contractState
@@ -251,7 +252,7 @@ export const createUnprovenInsertVerifierKeyTx = <C extends Contract.Any>(
 
   return unprovenTxFromContractUpdates(async () => {
     return (await contractRuntime.runPromise(contractExec.addOrReplaceContractOperation(
-      ImpureCircuitId(operation),
+      ProvableCircuitId(operation),
       ContractVerifierKey(newVk),
       {
         address: asContractAddress(contractAddress),

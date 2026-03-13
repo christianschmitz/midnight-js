@@ -15,7 +15,7 @@
 
 import type { Contract } from '@midnight-ntwrk/compact-js';
 import type { StateValue } from '@midnight-ntwrk/compact-runtime';
-import type { Bindingish, Proofish, Signaturish, Transaction } from '@midnight-ntwrk/ledger-v7';
+import type { Bindingish, Proofish, Signaturish, Transaction } from '@midnight-ntwrk/ledger-v8';
 import type {
   CallTxOptions,
   DeployContractOptions,
@@ -73,7 +73,7 @@ export const expectFoundAndDeployedTxDataEqual = <C extends Contract.Any>(
 };
 
 export const expectFoundAndDeployedStatesEqual = async <C extends Contract.Any>(
-  providers: MidnightProviders<Contract.ImpureCircuitId<C>, PrivateStateId, Contract.PrivateState<C> | unknown>,
+  providers: MidnightProviders<Contract.ProvableCircuitId<C>, PrivateStateId, Contract.PrivateState<C> | unknown>,
   deployTxData: FinalizedDeployTxData<C>,
   foundDeployTxData: FinalizedDeployTxDataBase<C>,
   privateStateId?: PrivateStateId,
@@ -103,7 +103,7 @@ export const expectSuccessfulTxData = (finalizedTxData: FinalizedTxData): void =
 };
 
 export const expectSuccessfulDeployTx = async <C extends Contract.Any>(
-  providers: MidnightProviders<Contract.ImpureCircuitId<C>, PrivateStateId, Contract.PrivateState<C> | unknown>,
+  providers: MidnightProviders<Contract.ProvableCircuitId<C>, PrivateStateId, Contract.PrivateState<C> | unknown>,
   deployTxData: FinalizedDeployTxData<C>,
   deployTxOptions?: DeployContractOptions<C> | DeployTxOptions<C>
 ): Promise<void> => {
@@ -135,10 +135,10 @@ export const expectSuccessfulDeployTx = async <C extends Contract.Any>(
   }
 };
 
-export const expectSuccessfulCallTx = async <C extends Contract.Any, ICK extends Contract.ImpureCircuitId<C>>(
-  providers: MidnightProviders<Contract.ImpureCircuitId<C>, PrivateStateId, Contract.PrivateState<C> | unknown>,
-  callTxData: FinalizedCallTxData<C, ICK>,
-  callTxOptions?: CallTxOptions<C, ICK>,
+export const expectSuccessfulCallTx = async <C extends Contract.Any, PCK extends Contract.ProvableCircuitId<C>>(
+  providers: MidnightProviders<Contract.ProvableCircuitId<C>, PrivateStateId, Contract.PrivateState<C> | unknown>,
+  callTxData: FinalizedCallTxData<C, PCK>,
+  callTxOptions?: CallTxOptions<C, PCK>,
   nextPrivateState?: Contract.PrivateState<C>
 ): Promise<void> => {
   expectSuccessfulTxData(callTxData.public);
