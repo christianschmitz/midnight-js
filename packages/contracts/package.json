@@ -1,6 +1,6 @@
 {
   "name": "@midnight-ntwrk/midnight-js-contracts",
-  "version": "4.0.0-rc.2",
+  "version": "4.0.1",
   "description": "MidnightJS module for interacting with contracts",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -24,7 +24,7 @@
     "build": "rollup -c rollup.config.mjs",
     "test": "vitest run",
     "test-no-utils": "vitest run --exclude src/test/*.test.ts",
-    "deploy": "yarn npm publish"
+    "deploy": "yarn npm publish --tolerate-republish"
   },
   "dependencies": {
     "@midnight-ntwrk/compact-js": "2.5.0",
