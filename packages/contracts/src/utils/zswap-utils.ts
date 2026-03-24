@@ -33,7 +33,6 @@ import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import {
   assertDefined,
   assertIsContractAddress,
-  fromHex,
   parseCoinPublicKeyToHex,
   parseEncPublicKeyToHex
 } from '@midnight-ntwrk/midnight-js-utils';
@@ -71,22 +70,9 @@ export const deserializeCoinInfo = (coinInfo: string): ShieldedCoinInfo => {
       value != null &&
       typeof value === 'object' &&
       '__big_int_val__' in value &&
-
       typeof value.__big_int_val__ === 'string'
     ) {
-
       return BigInt(value.__big_int_val__);
-    }
-    if (
-      (key === 'color' || key === 'nonce') &&
-      value != null &&
-      typeof value === 'object' &&
-      '__uint8Array_val__' in value &&
-
-      typeof value.__uint8Array_val__ === 'string'
-    ) {
-
-      return fromHex(value.__uint8Array_val__);
     }
     return value;
   });
@@ -126,11 +112,7 @@ export const unprovenOfferFromMap = <U extends UnprovenInput | UnprovenOutput | 
     return undefined;
   }
 
-  const offers = Array.from(map, (entry) => unprovenOfferFromCoinInfo(entry, f)).filter((offer) => offer != null);
-
-  if (offers.length === 0) {
-    return undefined;
-  }
+  const offers = Array.from(map, (entry) => unprovenOfferFromCoinInfo(entry, f));
 
   return offers.reduce((acc, curr) => acc.merge(curr));
 };
