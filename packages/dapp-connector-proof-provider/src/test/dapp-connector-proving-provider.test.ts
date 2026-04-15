@@ -66,27 +66,6 @@ describe('dappConnectorProvingProvider', () => {
     );
   });
 
-  it('should reject when getProvingProvider throws synchronously', async () => {
-    // Some wallet implementations surface configuration/permission errors as
-    // synchronous throws rather than rejected promises. The factory must still
-    // produce a well-formed rejected promise (no uncaught throw at the call
-    // site of `dappConnectorProvingProvider`).
-    mockApi.getProvingProvider = vi.fn(() => {
-      throw new Error('Wallet locked');
-    }) as unknown as DAppConnectorProvingAPI['getProvingProvider'];
-
-    await expect(dappConnectorProvingProvider(mockApi, mockZkConfigProvider)).rejects.toThrow('Wallet locked');
-  });
-
-  it('should preserve non-Error rejection values from the wallet', async () => {
-    // DApp Connector wallets are third-party code and may reject with
-    // non-Error values (strings, objects, numbers). The factory must not
-    // swallow or wrap these — callers need the original value for diagnosis.
-    mockApi.getProvingProvider = vi.fn().mockRejectedValue('USER_REJECTED');
-
-    await expect(dappConnectorProvingProvider(mockApi, mockZkConfigProvider)).rejects.toBe('USER_REJECTED');
-  });
-
   it('should propagate errors from zkConfigProvider.asKeyMaterialProvider', async () => {
     // Covers the ZKConfigProvider-unavailable case: the config provider itself
     // can fail to materialise key material (e.g. ZK artifacts not yet

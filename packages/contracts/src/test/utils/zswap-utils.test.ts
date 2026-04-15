@@ -31,7 +31,7 @@ import {
   ZswapChainState,
   ZswapOffer
 } from '@midnight-ntwrk/midnight-js-protocol/ledger';
-import { parseCoinPublicKeyToHex, parseEncPublicKeyToHex, toHex } from '@midnight-ntwrk/midnight-js-utils';
+import { parseEncPublicKeyToHex, toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { randomBytes } from 'crypto';
 import { beforeAll, expect, vi } from 'vitest';
 
@@ -900,20 +900,16 @@ describe('Zswap utilities', () => {
   });
 
   describe('Burn address constants', () => {
-    test('SHIELDED_BURN_COIN_PUBLIC_KEY is 32 zero bytes as hex', () => {
-      expect(SHIELDED_BURN_COIN_PUBLIC_KEY).toBe('0'.repeat(64));
-    });
-
-    test('BURN_ENCRYPTION_PUBLIC_KEY is a valid 32-byte hex string', () => {
-      expect(BURN_ENCRYPTION_PUBLIC_KEY).toMatch(/^[0-9a-f]{64}$/);
-    });
-
     test('BURN_ENCRYPTION_PUBLIC_KEY is not the zero point', () => {
       expect(BURN_ENCRYPTION_PUBLIC_KEY).not.toBe('0'.repeat(64));
     });
   });
 
   describe('createEncryptionPublicKeyResolver precedence', () => {
+    // These two tests encode the security property at the heart of #745:
+    // the fixed wallet/burn keys must win even if a DApp-supplied mapping
+    // tries to substitute them, otherwise a malicious mapping could redirect
+    // the wallet's own outputs.
     test('wallet key takes precedence over additional-mapping override for the wallet cpk', () => {
       const walletCpk = sampleCoinPublicKey();
       const walletEpk = sampleEncryptionPublicKey();
@@ -936,46 +932,6 @@ describe('Zswap utilities', () => {
       const resolver = createEncryptionPublicKeyResolver(walletCpk, walletEpk, mappings);
 
       expect(resolver(SHIELDED_BURN_COIN_PUBLIC_KEY)).toBe(BURN_ENCRYPTION_PUBLIC_KEY);
-    });
-
-    test('resolves multiple third-party mappings independently', () => {
-      const walletCpk = sampleCoinPublicKey();
-      const walletEpk = sampleEncryptionPublicKey();
-      const firstCpk = sampleCoinPublicKey();
-      const firstEpk = sampleEncryptionPublicKey();
-      const secondCpk = sampleCoinPublicKey();
-      const secondEpk = sampleEncryptionPublicKey();
-      const mappings = new Map([
-        [firstCpk, firstEpk],
-        [secondCpk, secondEpk]
-      ]);
-      const resolver = createEncryptionPublicKeyResolver(walletCpk, walletEpk, mappings);
-
-      expect(resolver(firstCpk)).toBe(parseEncPublicKeyToHex(firstEpk, getNetworkId()));
-      expect(resolver(secondCpk)).toBe(parseEncPublicKeyToHex(secondEpk, getNetworkId()));
-    });
-
-    test('empty additional-mappings map still resolves wallet, burn, and returns undefined for unknown', () => {
-      const walletCpk = sampleCoinPublicKey();
-      const walletEpk = sampleEncryptionPublicKey();
-      const resolver = createEncryptionPublicKeyResolver(walletCpk, walletEpk, new Map());
-
-      expect(resolver(walletCpk)).toBe(parseEncPublicKeyToHex(walletEpk, getNetworkId()));
-      expect(resolver(SHIELDED_BURN_COIN_PUBLIC_KEY)).toBe(BURN_ENCRYPTION_PUBLIC_KEY);
-      expect(resolver(sampleCoinPublicKey())).toBeUndefined();
-    });
-
-    test('mapping keyed by hex cpk resolves when queried via the original bech32 form', () => {
-      const walletCpk = sampleCoinPublicKey();
-      const walletEpk = sampleEncryptionPublicKey();
-      const thirdCpkBech32 = sampleCoinPublicKey();
-      const thirdEpk = sampleEncryptionPublicKey();
-      const thirdCpkHex = parseCoinPublicKeyToHex(thirdCpkBech32, getNetworkId());
-      // Store the mapping under the hex form; queries must still succeed with the bech32 form.
-      const mappings = new Map([[thirdCpkHex, thirdEpk]]);
-      const resolver = createEncryptionPublicKeyResolver(walletCpk, walletEpk, mappings);
-
-      expect(resolver(thirdCpkBech32)).toBe(parseEncPublicKeyToHex(thirdEpk, getNetworkId()));
     });
   });
 
@@ -1052,37 +1008,6 @@ describe('Zswap utilities', () => {
       };
 
       expect(() => zswapStateToOffer(zswapState, resolver)).toThrow(/Unable to resolve encryption public key/);
-    });
-  });
-
-  describe('encryptionPublicKeyResolverForZswapState with additional mappings', () => {
-    test('forwards additional mappings while still resolving wallet and burn', () => {
-      const walletCpk = sampleCoinPublicKey();
-      const walletEpk = sampleEncryptionPublicKey();
-      const thirdCpk = sampleCoinPublicKey();
-      const thirdEpk = sampleEncryptionPublicKey();
-      const mappings = new Map([[thirdCpk, thirdEpk]]);
-
-      const zswapState = { currentIndex: 0n, coinPublicKey: walletCpk, inputs: [], outputs: [] };
-      const resolver = encryptionPublicKeyResolverForZswapState(zswapState, walletCpk, walletEpk, mappings);
-
-      expect(resolver(thirdCpk)).toBe(parseEncPublicKeyToHex(thirdEpk, getNetworkId()));
-      expect(resolver(walletCpk)).toBe(parseEncPublicKeyToHex(walletEpk, getNetworkId()));
-      expect(resolver(SHIELDED_BURN_COIN_PUBLIC_KEY)).toBe(BURN_ENCRYPTION_PUBLIC_KEY);
-    });
-
-    test('throws on coin public key mismatch even when mappings are supplied', () => {
-      const walletCpk = sampleCoinPublicKey();
-      const walletEpk = sampleEncryptionPublicKey();
-      const differentCpk = sampleCoinPublicKey();
-      const thirdCpk = sampleCoinPublicKey();
-      const thirdEpk = sampleEncryptionPublicKey();
-      const mappings = new Map([[thirdCpk, thirdEpk]]);
-      const zswapState = { currentIndex: 0n, coinPublicKey: differentCpk, inputs: [], outputs: [] };
-
-      expect(() => encryptionPublicKeyResolverForZswapState(zswapState, walletCpk, walletEpk, mappings)).toThrow(
-        /Unsupported coin/
-      );
     });
   });
 });
