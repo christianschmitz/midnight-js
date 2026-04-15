@@ -29,8 +29,9 @@ import {
   shieldedToken,
   Transaction,
   ZswapChainState,
-  ZswapOffer} from '@midnight-ntwrk/midnight-js-protocol/ledger';
-import { parseCoinPublicKeyToHex, parseEncPublicKeyToHex,toHex } from '@midnight-ntwrk/midnight-js-utils';
+  ZswapOffer
+} from '@midnight-ntwrk/midnight-js-protocol/ledger';
+import { parseCoinPublicKeyToHex, parseEncPublicKeyToHex, toHex } from '@midnight-ntwrk/midnight-js-utils';
 import { randomBytes } from 'crypto';
 import { beforeAll, expect, vi } from 'vitest';
 
@@ -56,7 +57,9 @@ const arbitraryPositiveValue = fc.bigInt({ min: 1n, max: (1n << 64n) - 1n });
 
 const arbitraryNativeCoinInfo = arbitraryValue.map((value) => createShieldedCoinInfo(nativeToken().raw, value));
 
-const arbitraryPositiveNativeCoinInfo = arbitraryPositiveValue.map((value) => createShieldedCoinInfo(nativeToken().raw, value));
+const arbitraryPositiveNativeCoinInfo = arbitraryPositiveValue.map((value) =>
+  createShieldedCoinInfo(nativeToken().raw, value)
+);
 
 const arbitraryHex = arbitraryBytes.map(toHex);
 
@@ -110,7 +113,6 @@ const randomQualifiedShieldedCoinInfo = () => sampleOne(arbitraryQualifiedShield
 const randomEncryptionPublicKey = () => sampleOne(arbitraryHex);
 
 const randomCoinPublicKey = () => sampleOne(arbitraryCoinPublicKey);
-
 
 const dropMtIndex = ({ mt_index: _, ...coin }: QualifiedShieldedCoinInfo) => coin;
 
@@ -226,7 +228,8 @@ describe('Zswap utilities', () => {
       const constantResolver: EncryptionPublicKeyResolver = () => randomEncryptionPublicKey();
       const output = createZswapOutput({ coinInfo, recipient }, constantResolver);
       const proofErasedOffer = Transaction.fromParts(
-        getNetworkId(), ZswapOffer.fromOutput(output, nativeToken().raw, value)
+        getNetworkId(),
+        ZswapOffer.fromOutput(output, nativeToken().raw, value)
       ).eraseProofs().guaranteedOffer;
       if (proofErasedOffer) {
         const [newZswapChainState, mtIndices] = prevZSwapChainState.tryApply(proofErasedOffer);
@@ -243,10 +246,12 @@ describe('Zswap utilities', () => {
     recipient: Recipient,
     preExistingCoins: (QualifiedShieldedCoinInfo | ShieldedCoinInfo)[]
   ): fc.Arbitrary<[QualifiedShieldedCoinInfo[], { recipient: Recipient; coinInfo: ShieldedCoinInfo }[]]> =>
-    fc.array(arbitraryPositiveNativeCoinInfo.filter(distinctFrom(preExistingCoins)), { minLength: 0 }).map((matchingOutputsNoRecipient) => [
-      withZeroMtIndex(matchingOutputsNoRecipient), // matching inputs
-      toOutputData(recipient, matchingOutputsNoRecipient) // matching outputs
-    ]);
+    fc
+      .array(arbitraryPositiveNativeCoinInfo.filter(distinctFrom(preExistingCoins)), { minLength: 0 })
+      .map((matchingOutputsNoRecipient) => [
+        withZeroMtIndex(matchingOutputsNoRecipient), // matching inputs
+        toOutputData(recipient, matchingOutputsNoRecipient) // matching outputs
+      ]);
 
   // Helper types for better readability
   type ZswapScenarioData = {
@@ -311,21 +316,23 @@ describe('Zswap utilities', () => {
       return fc
         .array(arbitraryPositiveNativeCoinInfo.filter(distinctFrom(nonMatchingInputs)), { minLength: 1 })
         .chain((nonMatchingOutputsNoRecipient) =>
-          arbitraryMatchingInputOutputPairs(recipient, nonMatchingOutputsNoRecipient.concat(nonMatchingInputs))
-            .chain(([matchingInputs, matchingOutputs]) =>
-              fc.boolean().map((useParams) =>
-                createZswapScenarioData(
-                  recipient,
-                  values,
-                  nonMatchingOutputsNoRecipient,
-                  matchingInputs,
-                  matchingOutputs,
-                  useParams,
-                  zswapChainState,
-                  nonMatchingInputs
+          arbitraryMatchingInputOutputPairs(recipient, nonMatchingOutputsNoRecipient.concat(nonMatchingInputs)).chain(
+            ([matchingInputs, matchingOutputs]) =>
+              fc
+                .boolean()
+                .map((useParams) =>
+                  createZswapScenarioData(
+                    recipient,
+                    values,
+                    nonMatchingOutputsNoRecipient,
+                    matchingInputs,
+                    matchingOutputs,
+                    useParams,
+                    zswapChainState,
+                    nonMatchingInputs
+                  )
                 )
-              )
-            )
+          )
         );
     });
 
@@ -378,7 +385,7 @@ describe('Zswap utilities', () => {
       walletCoinPublicKey: CoinPublicKey;
       outputsForWallet: { recipient: Recipient; coinInfo: ShieldedCoinInfo }[];
       outputsNotForWallet: { recipient: Recipient; coinInfo: ShieldedCoinInfo }[];
-    }
+    };
     const arbitraryScenario = arbitraryCoinPublicKey.chain((walletCoinPublicKey) =>
       fc.record<ScenarioData>({
         walletCoinPublicKey: fc.constant(walletCoinPublicKey),
@@ -471,7 +478,8 @@ describe('Zswap utilities', () => {
       const constantResolver: EncryptionPublicKeyResolver = () => randomEncryptionPublicKey();
       const output = createZswapOutput({ coinInfo, recipient }, constantResolver);
       const proofErasedOffer = Transaction.fromParts(
-        getNetworkId(), ZswapOffer.fromOutput(output, nativeToken().raw, 100n)
+        getNetworkId(),
+        ZswapOffer.fromOutput(output, nativeToken().raw, 100n)
       ).eraseProofs().guaranteedOffer!;
       const [chainStateNoRehash, mtIndices] = new ZswapChainState().tryApply(proofErasedOffer);
       const qualifiedCoin = { ...coinInfo, mt_index: mtIndices.get(output.commitment)! };
@@ -901,8 +909,6 @@ describe('Zswap utilities', () => {
     });
 
     test('BURN_ENCRYPTION_PUBLIC_KEY is not the zero point', () => {
-      // A plain all-zeros string is not a valid Jubjub curve point; the derived
-      // constant must be non-zero to avoid the bug that motivated #745.
       expect(BURN_ENCRYPTION_PUBLIC_KEY).not.toBe('0'.repeat(64));
     });
   });
@@ -1011,7 +1017,6 @@ describe('Zswap utilities', () => {
       expect(spy).toHaveBeenCalledWith(SHIELDED_BURN_COIN_PUBLIC_KEY);
 
       // Verify each recipient got its OWN key — not the wallet key reused for all outputs
-      // (which was the bug fixed by #745).
       const resultsByCpk = new Map(
         spy.mock.calls.map((args, i) => {
           const mockResult = spy.mock.results[i];
@@ -1075,9 +1080,9 @@ describe('Zswap utilities', () => {
       const mappings = new Map([[thirdCpk, thirdEpk]]);
       const zswapState = { currentIndex: 0n, coinPublicKey: differentCpk, inputs: [], outputs: [] };
 
-      expect(() =>
-        encryptionPublicKeyResolverForZswapState(zswapState, walletCpk, walletEpk, mappings)
-      ).toThrow(/Unsupported coin/);
+      expect(() => encryptionPublicKeyResolverForZswapState(zswapState, walletCpk, walletEpk, mappings)).toThrow(
+        /Unsupported coin/
+      );
     });
   });
 });
