@@ -430,9 +430,9 @@ describe('Level Private State Provider', (): void => {
       const exportData = await db.exportPrivateStates({ password: EXPORT_PASSWORD });
       await db.clear();
 
-      await expect(db.importPrivateStates(exportData, { password: 'Wrong-Pass8-Test!!' })).rejects.toThrow(
-        ExportDecryptionError
-      );
+      await expect(
+        db.importPrivateStates(exportData, { password: 'Wrong-Pass8-Test!!' })
+      ).rejects.toThrow(ExportDecryptionError);
     });
 
     test('throws PrivateStateExportError when no states to export', async () => {
@@ -447,7 +447,9 @@ describe('Level Private State Provider', (): void => {
       db.setContractAddress(TEST_CONTRACT_ADDRESS);
       await db.set('stringValue', testStates.stringValue);
 
-      await expect(db.exportPrivateStates({ password: 'short' })).rejects.toThrow(PrivateStateExportError);
+      await expect(
+        db.exportPrivateStates({ password: 'short' })
+      ).rejects.toThrow(PrivateStateExportError);
     });
 
     test('throws PrivateStateExportError for short import password', async () => {
@@ -458,7 +460,9 @@ describe('Level Private State Provider', (): void => {
       const exportData = await db.exportPrivateStates({ password: EXPORT_PASSWORD });
       await db.clear();
 
-      await expect(db.importPrivateStates(exportData, { password: 'short' })).rejects.toThrow(PrivateStateExportError);
+      await expect(
+        db.importPrivateStates(exportData, { password: 'short' })
+      ).rejects.toThrow(PrivateStateExportError);
     });
 
     test('throws ImportConflictError when conflict strategy is error (default)', async () => {
@@ -538,9 +542,9 @@ describe('Level Private State Provider', (): void => {
         salt: '0'.repeat(64)
       };
 
-      await expect(db.importPrivateStates(badExport as unknown as PrivateStateExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importPrivateStates(badExport as unknown as PrivateStateExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('throws InvalidExportFormatError for missing fields', async () => {
@@ -552,9 +556,9 @@ describe('Level Private State Provider', (): void => {
         // missing encryptedPayload and salt
       };
 
-      await expect(db.importPrivateStates(badExport as unknown as PrivateStateExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importPrivateStates(badExport as unknown as PrivateStateExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('throws InvalidExportFormatError for invalid salt length', async () => {
@@ -567,9 +571,9 @@ describe('Level Private State Provider', (): void => {
         salt: 'abc123' // too short
       };
 
-      await expect(db.importPrivateStates(badExport as unknown as PrivateStateExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importPrivateStates(badExport as unknown as PrivateStateExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('throws InvalidExportFormatError for invalid salt characters', async () => {
@@ -582,9 +586,9 @@ describe('Level Private State Provider', (): void => {
         salt: 'g'.repeat(64) // invalid hex
       };
 
-      await expect(db.importPrivateStates(badExport as unknown as PrivateStateExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importPrivateStates(badExport as unknown as PrivateStateExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('does NOT export signing keys', async () => {
@@ -654,7 +658,9 @@ describe('Level Private State Provider', (): void => {
       await db.set('stringValue', testStates.stringValue);
       await db.set('numberValue', testStates.numberValue);
 
-      await expect(db.exportPrivateStates({ maxStates: 1 })).rejects.toThrow(PrivateStateExportError);
+      await expect(
+        db.exportPrivateStates({ maxStates: 1 })
+      ).rejects.toThrow(PrivateStateExportError);
     });
 
     test('enforces maxStates limit on import', async () => {
@@ -666,7 +672,9 @@ describe('Level Private State Provider', (): void => {
       const exportData = await db.exportPrivateStates();
       await db.clear();
 
-      await expect(db.importPrivateStates(exportData, { maxStates: 1 })).rejects.toThrow(InvalidExportFormatError);
+      await expect(
+        db.importPrivateStates(exportData, { maxStates: 1 })
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     describe('malformed data edge cases', () => {
@@ -682,9 +690,9 @@ describe('Level Private State Provider', (): void => {
           salt: '0'.repeat(64)
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for payload that decrypts to invalid JSON', async () => {
@@ -702,9 +710,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for payload with invalid structure (missing states)', async () => {
@@ -714,14 +722,12 @@ describe('Level Private State Provider', (): void => {
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
         // Valid JSON but missing required 'states' field
-        const invalidPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            stateCount: 0
-            // missing 'states' field
-          })
-        );
+        const invalidPayload = await encryption.encrypt(JSON.stringify({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          stateCount: 0
+          // missing 'states' field
+        }));
 
         const badExport: PrivateStateExport = {
           format: 'midnight-private-state-export',
@@ -729,9 +735,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for payload with invalid structure (missing version)', async () => {
@@ -741,13 +747,11 @@ describe('Level Private State Provider', (): void => {
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
         // Valid JSON but missing required 'version' field
-        const invalidPayload = await encryption.encrypt(
-          JSON.stringify({
-            exportedAt: new Date().toISOString(),
-            stateCount: 0,
-            states: {}
-          })
-        );
+        const invalidPayload = await encryption.encrypt(JSON.stringify({
+          exportedAt: new Date().toISOString(),
+          stateCount: 0,
+          states: {}
+        }));
 
         const badExport: PrivateStateExport = {
           format: 'midnight-private-state-export',
@@ -755,9 +759,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for stateCount mismatch', async () => {
@@ -767,16 +771,14 @@ describe('Level Private State Provider', (): void => {
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
         // stateCount says 5 but only 1 state present
-        const mismatchedPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            stateCount: 5,
-            states: {
-              'test-id': '{"json":"value"}'
-            }
-          })
-        );
+        const mismatchedPayload = await encryption.encrypt(JSON.stringify({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          stateCount: 5,
+          states: {
+            'test-id': '{"json":"value"}'
+          }
+        }));
 
         const badExport: PrivateStateExport = {
           format: 'midnight-private-state-export',
@@ -784,9 +786,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws InvalidExportFormatError for unsupported version', async () => {
@@ -795,14 +797,12 @@ describe('Level Private State Provider', (): void => {
 
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
-        const unsupportedVersionPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 999,
-            exportedAt: new Date().toISOString(),
-            stateCount: 0,
-            states: {}
-          })
-        );
+        const unsupportedVersionPayload = await encryption.encrypt(JSON.stringify({
+          version: 999,
+          exportedAt: new Date().toISOString(),
+          stateCount: 0,
+          states: {}
+        }));
 
         const badExport: PrivateStateExport = {
           format: 'midnight-private-state-export',
@@ -810,9 +810,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          InvalidExportFormatError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(InvalidExportFormatError);
       });
 
       test('throws error for state values that fail superjson.parse', async () => {
@@ -822,16 +822,14 @@ describe('Level Private State Provider', (): void => {
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
         // State value is not valid superjson
-        const invalidStatePayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            stateCount: 1,
-            states: {
-              'test-id': 'not valid superjson {{{' // Invalid superjson
-            }
-          })
-        );
+        const invalidStatePayload = await encryption.encrypt(JSON.stringify({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          stateCount: 1,
+          states: {
+            'test-id': 'not valid superjson {{{' // Invalid superjson
+          }
+        }));
 
         const badExport: PrivateStateExport = {
           format: 'midnight-private-state-export',
@@ -839,7 +837,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow();
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow();
       });
 
       test('throws ExportDecryptionError for tampered encrypted payload', async () => {
@@ -872,9 +872,9 @@ describe('Level Private State Provider', (): void => {
           salt: ''
         };
 
-        await expect(db.importPrivateStates(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          InvalidExportFormatError
-        );
+        await expect(
+          db.importPrivateStates(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(InvalidExportFormatError);
       });
 
       test('throws InvalidExportFormatError for salt with uppercase hex (validates exact format)', async () => {
@@ -885,14 +885,12 @@ describe('Level Private State Provider', (): void => {
         const uppercaseSalt = 'A'.repeat(64);
         const salt = Buffer.from(uppercaseSalt, 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
-        const validPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            stateCount: 0,
-            states: {}
-          })
-        );
+        const validPayload = await encryption.encrypt(JSON.stringify({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          stateCount: 0,
+          states: {}
+        }));
 
         const exportWithUppercase: PrivateStateExport = {
           format: 'midnight-private-state-export',
@@ -901,11 +899,9 @@ describe('Level Private State Provider', (): void => {
         };
 
         // Should NOT throw for uppercase hex - it's valid
-        await expect(db.importPrivateStates(exportWithUppercase, { password: VALID_PASSWORD })).resolves.toEqual({
-          imported: 0,
-          skipped: 0,
-          overwritten: 0
-        });
+        await expect(
+          db.importPrivateStates(exportWithUppercase, { password: VALID_PASSWORD })
+        ).resolves.toEqual({ imported: 0, skipped: 0, overwritten: 0 });
       });
     });
   });
@@ -968,9 +964,9 @@ describe('Level Private State Provider', (): void => {
       const exportData = await db.exportSigningKeys({ password: EXPORT_PASSWORD });
       await db.clearSigningKeys();
 
-      await expect(db.importSigningKeys(exportData, { password: 'wrong-password-12345' })).rejects.toThrow(
-        ExportDecryptionError
-      );
+      await expect(
+        db.importSigningKeys(exportData, { password: 'wrong-password-12345' })
+      ).rejects.toThrow(ExportDecryptionError);
     });
 
     test('throws SigningKeyExportError when no keys to export', async () => {
@@ -984,7 +980,9 @@ describe('Level Private State Provider', (): void => {
       const signingKey = sampleSigningKey();
       await db.setSigningKey(CONTRACT_ADDRESS_1, signingKey);
 
-      await expect(db.exportSigningKeys({ password: 'short' })).rejects.toThrow(SigningKeyExportError);
+      await expect(
+        db.exportSigningKeys({ password: 'short' })
+      ).rejects.toThrow(SigningKeyExportError);
     });
 
     test('throws SigningKeyExportError for short import password', async () => {
@@ -995,7 +993,9 @@ describe('Level Private State Provider', (): void => {
       const exportData = await db.exportSigningKeys({ password: EXPORT_PASSWORD });
       await db.clearSigningKeys();
 
-      await expect(db.importSigningKeys(exportData, { password: 'short' })).rejects.toThrow(SigningKeyExportError);
+      await expect(
+        db.importSigningKeys(exportData, { password: 'short' })
+      ).rejects.toThrow(SigningKeyExportError);
     });
 
     test('throws ImportConflictError when conflict strategy is error (default)', async () => {
@@ -1074,9 +1074,9 @@ describe('Level Private State Provider', (): void => {
         salt: '0'.repeat(64)
       };
 
-      await expect(db.importSigningKeys(badExport as unknown as SigningKeyExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importSigningKeys(badExport as unknown as SigningKeyExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('throws InvalidExportFormatError for missing fields', async () => {
@@ -1086,9 +1086,9 @@ describe('Level Private State Provider', (): void => {
         format: 'midnight-signing-key-export'
       };
 
-      await expect(db.importSigningKeys(badExport as unknown as SigningKeyExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importSigningKeys(badExport as unknown as SigningKeyExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('throws InvalidExportFormatError for invalid salt length', async () => {
@@ -1100,9 +1100,9 @@ describe('Level Private State Provider', (): void => {
         salt: 'abc123'
       };
 
-      await expect(db.importSigningKeys(badExport as unknown as SigningKeyExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importSigningKeys(badExport as unknown as SigningKeyExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('throws InvalidExportFormatError for invalid salt characters', async () => {
@@ -1114,9 +1114,9 @@ describe('Level Private State Provider', (): void => {
         salt: 'g'.repeat(64)
       };
 
-      await expect(db.importSigningKeys(badExport as unknown as SigningKeyExport)).rejects.toThrow(
-        InvalidExportFormatError
-      );
+      await expect(
+        db.importSigningKeys(badExport as unknown as SigningKeyExport)
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('enforces maxKeys limit on export', async () => {
@@ -1124,7 +1124,9 @@ describe('Level Private State Provider', (): void => {
       await db.setSigningKey(CONTRACT_ADDRESS_1, sampleSigningKey());
       await db.setSigningKey(CONTRACT_ADDRESS_2, sampleSigningKey());
 
-      await expect(db.exportSigningKeys({ maxKeys: 1 })).rejects.toThrow(SigningKeyExportError);
+      await expect(
+        db.exportSigningKeys({ maxKeys: 1 })
+      ).rejects.toThrow(SigningKeyExportError);
     });
 
     test('enforces maxKeys limit on import', async () => {
@@ -1135,7 +1137,9 @@ describe('Level Private State Provider', (): void => {
       const exportData = await db.exportSigningKeys();
       await db.clearSigningKeys();
 
-      await expect(db.importSigningKeys(exportData, { maxKeys: 1 })).rejects.toThrow(InvalidExportFormatError);
+      await expect(
+        db.importSigningKeys(exportData, { maxKeys: 1 })
+      ).rejects.toThrow(InvalidExportFormatError);
     });
 
     test('handles mixed import scenarios correctly', async () => {
@@ -1175,9 +1179,9 @@ describe('Level Private State Provider', (): void => {
           salt: '0'.repeat(64)
         };
 
-        await expect(db.importSigningKeys(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importSigningKeys(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for payload that decrypts to invalid JSON', async () => {
@@ -1193,9 +1197,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importSigningKeys(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importSigningKeys(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for payload with invalid structure (missing keys)', async () => {
@@ -1203,13 +1207,11 @@ describe('Level Private State Provider', (): void => {
 
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
-        const invalidPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            keyCount: 0
-          })
-        );
+        const invalidPayload = await encryption.encrypt(JSON.stringify({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          keyCount: 0
+        }));
 
         const badExport: SigningKeyExport = {
           format: 'midnight-signing-key-export',
@@ -1217,9 +1219,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importSigningKeys(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importSigningKeys(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for payload with invalid structure (missing version)', async () => {
@@ -1227,13 +1229,11 @@ describe('Level Private State Provider', (): void => {
 
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
-        const invalidPayload = await encryption.encrypt(
-          JSON.stringify({
-            exportedAt: new Date().toISOString(),
-            keyCount: 0,
-            keys: {}
-          })
-        );
+        const invalidPayload = await encryption.encrypt(JSON.stringify({
+          exportedAt: new Date().toISOString(),
+          keyCount: 0,
+          keys: {}
+        }));
 
         const badExport: SigningKeyExport = {
           format: 'midnight-signing-key-export',
@@ -1241,9 +1241,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importSigningKeys(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importSigningKeys(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws ExportDecryptionError for keyCount mismatch', async () => {
@@ -1251,16 +1251,14 @@ describe('Level Private State Provider', (): void => {
 
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
-        const mismatchedPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 1,
-            exportedAt: new Date().toISOString(),
-            keyCount: 5,
-            keys: {
-              'test-address': { sk: 'test' }
-            }
-          })
-        );
+        const mismatchedPayload = await encryption.encrypt(JSON.stringify({
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          keyCount: 5,
+          keys: {
+            'test-address': { sk: 'test' }
+          }
+        }));
 
         const badExport: SigningKeyExport = {
           format: 'midnight-signing-key-export',
@@ -1268,9 +1266,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importSigningKeys(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          ExportDecryptionError
-        );
+        await expect(
+          db.importSigningKeys(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(ExportDecryptionError);
       });
 
       test('throws InvalidExportFormatError for unsupported version', async () => {
@@ -1278,14 +1276,12 @@ describe('Level Private State Provider', (): void => {
 
         const salt = Buffer.from('0'.repeat(64), 'hex');
         const encryption = await StorageEncryption.create(VALID_PASSWORD, { existingSalt: salt });
-        const unsupportedVersionPayload = await encryption.encrypt(
-          JSON.stringify({
-            version: 999,
-            exportedAt: new Date().toISOString(),
-            keyCount: 0,
-            keys: {}
-          })
-        );
+        const unsupportedVersionPayload = await encryption.encrypt(JSON.stringify({
+          version: 999,
+          exportedAt: new Date().toISOString(),
+          keyCount: 0,
+          keys: {}
+        }));
 
         const badExport: SigningKeyExport = {
           format: 'midnight-signing-key-export',
@@ -1293,9 +1289,9 @@ describe('Level Private State Provider', (): void => {
           salt: salt.toString('hex')
         };
 
-        await expect(db.importSigningKeys(badExport, { password: VALID_PASSWORD })).rejects.toThrow(
-          InvalidExportFormatError
-        );
+        await expect(
+          db.importSigningKeys(badExport, { password: VALID_PASSWORD })
+        ).rejects.toThrow(InvalidExportFormatError);
       });
 
       test('throws ExportDecryptionError for tampered encrypted payload', async () => {
@@ -1351,8 +1347,13 @@ describe('Level Private State Provider', (): void => {
 
       levelPrivateStateProvider<PID, PS>(testConfig);
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(expect.stringContaining('MIDNIGHT: Private state and signing keys'));
-      expect(mockSessionStorage.setItem).toHaveBeenCalledWith('__midnight_browser_warning_shown__', 'true');
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('MIDNIGHT: Private state and signing keys')
+      );
+      expect(mockSessionStorage.setItem).toHaveBeenCalledWith(
+        '__midnight_browser_warning_shown__',
+        'true'
+      );
     });
 
     test('does not show warning in Node.js environment', () => {
@@ -1720,10 +1721,7 @@ describe('Level Private State Provider', (): void => {
         });
 
         await expect(
-          db.changePassword(
-            () => OLD_PASSWORD,
-            () => NEW_PASSWORD
-          )
+          db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD)
         ).rejects.toThrow('Contract address not set');
       });
 
@@ -1740,10 +1738,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key1', 'value1');
         await db.set('key2', 'value2');
 
-        await db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
 
         currentPassword = NEW_PASSWORD;
 
@@ -1765,10 +1760,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key1', 'value1');
 
         await expect(
-          db.changePassword(
-            () => 'Wrong-Password-88!',
-            () => NEW_PASSWORD
-          )
+          db.changePassword(() => 'Wrong-Password-88!', () => NEW_PASSWORD)
         ).rejects.toThrow();
 
         const value = await db.get('key1');
@@ -1786,10 +1778,7 @@ describe('Level Private State Provider', (): void => {
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
 
         await expect(
-          db.changePassword(
-            () => OLD_PASSWORD,
-            () => NEW_PASSWORD
-          )
+          db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD)
         ).resolves.not.toThrow();
       });
 
@@ -1811,10 +1800,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('other-key', 'other-value');
 
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
-        await db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
 
         currentPassword = NEW_PASSWORD;
         const value1 = await db.get('key1');
@@ -1837,10 +1823,7 @@ describe('Level Private State Provider', (): void => {
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
         await db.set('key1', 'value1');
 
-        await db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
 
         const freshDb = levelPrivateStateProvider<string, string>(config);
@@ -1861,10 +1844,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key1', 'value1');
 
         await expect(
-          db.changePassword(
-            () => OLD_PASSWORD,
-            () => 'short'
-          )
+          db.changePassword(() => OLD_PASSWORD, () => 'short')
         ).rejects.toThrow();
       });
 
@@ -1917,10 +1897,7 @@ describe('Level Private State Provider', (): void => {
         const valueBefore = await db.get('v1-key');
         expect(valueBefore).toBe('v1-test-value');
 
-        await db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
 
         const valueAfter = await db.get('v1-key');
@@ -1972,10 +1949,7 @@ describe('Level Private State Provider', (): void => {
         await db.setSigningKey('address1' as ContractAddress, signingKey1);
         await db.setSigningKey('address2' as ContractAddress, signingKey2);
 
-        await db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
 
         currentPassword = NEW_PASSWORD;
 
@@ -1997,10 +1971,7 @@ describe('Level Private State Provider', (): void => {
         await db.setSigningKey('address1' as ContractAddress, signingKey);
 
         await expect(
-          db.changeSigningKeysPassword(
-            () => 'Wrong-Password-88!',
-            () => NEW_PASSWORD
-          )
+          db.changeSigningKeysPassword(() => 'Wrong-Password-88!', () => NEW_PASSWORD)
         ).rejects.toThrow();
 
         const key = await db.getSigningKey('address1' as ContractAddress);
@@ -2017,10 +1988,7 @@ describe('Level Private State Provider', (): void => {
         const db = levelPrivateStateProvider<string, string>(config);
 
         await expect(
-          db.changeSigningKeysPassword(
-            () => OLD_PASSWORD,
-            () => NEW_PASSWORD
-          )
+          db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD)
         ).resolves.not.toThrow();
       });
 
@@ -2036,10 +2004,7 @@ describe('Level Private State Provider', (): void => {
         const db = levelPrivateStateProvider<string, string>(config);
         await db.setSigningKey('address1' as ContractAddress, signingKey);
 
-        await db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
 
         const key = await db.getSigningKey('address1' as ContractAddress);
@@ -2058,10 +2023,7 @@ describe('Level Private State Provider', (): void => {
         const db = levelPrivateStateProvider<string, string>(config);
         await db.setSigningKey('address1' as ContractAddress, signingKey);
 
-        await db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        await db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
 
         const freshDb = levelPrivateStateProvider<string, string>(config);
@@ -2084,10 +2046,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key2', 'value2');
         await db.set('key3', 'value3');
 
-        const result = await db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const result = await db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
 
         expect(result.entriesMigrated).toBe(3);
       });
@@ -2102,10 +2061,7 @@ describe('Level Private State Provider', (): void => {
         const db = levelPrivateStateProvider<string, string>(config);
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
 
-        const result = await db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const result = await db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
 
         expect(result.entriesMigrated).toBe(0);
       });
@@ -2121,10 +2077,7 @@ describe('Level Private State Provider', (): void => {
         await db.setSigningKey('addr1' as ContractAddress, sampleSigningKey());
         await db.setSigningKey('addr2' as ContractAddress, sampleSigningKey());
 
-        const result = await db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const result = await db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
 
         expect(result.entriesMigrated).toBe(2);
       });
@@ -2145,14 +2098,8 @@ describe('Level Private State Provider', (): void => {
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
         await db.set('key1', 'value1');
 
-        const rotation1 = db.changePassword(
-          () => OLD_PASSWORD,
-          () => SECOND_PASSWORD
-        );
-        const rotation2 = db.changePassword(
-          () => SECOND_PASSWORD,
-          () => THIRD_PASSWORD
-        );
+        const rotation1 = db.changePassword(() => OLD_PASSWORD, () => SECOND_PASSWORD);
+        const rotation2 = db.changePassword(() => SECOND_PASSWORD, () => THIRD_PASSWORD);
 
         await rotation1;
         await rotation2;
@@ -2175,10 +2122,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key1', 'value1');
         await db.set('key2', 'value2');
 
-        const rotationPromise = db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const rotationPromise = db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         const removePromise = db.remove('key1');
 
         await rotationPromise;
@@ -2207,10 +2151,7 @@ describe('Level Private State Provider', (): void => {
         await db.setSigningKey('addr1' as ContractAddress, signingKey1);
         await db.setSigningKey('addr2' as ContractAddress, signingKey2);
 
-        const rotationPromise = db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const rotationPromise = db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         const removePromise = db.removeSigningKey('addr1' as ContractAddress);
 
         await rotationPromise;
@@ -2236,10 +2177,7 @@ describe('Level Private State Provider', (): void => {
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
         await db.set('key1', 'value1');
 
-        const rotationPromise = db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const rotationPromise = db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
         const getPromise = db.get('key1');
 
@@ -2261,10 +2199,7 @@ describe('Level Private State Provider', (): void => {
         db.setContractAddress(ROTATION_CONTRACT_ADDRESS);
         await db.set('key1', 'value1');
 
-        const rotationPromise = db.changePassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const rotationPromise = db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
         const setPromise = db.set('key2', 'value2');
 
@@ -2291,10 +2226,7 @@ describe('Level Private State Provider', (): void => {
         const db = levelPrivateStateProvider<string, string>(config);
         await db.setSigningKey('addr1' as ContractAddress, signingKey);
 
-        const rotationPromise = db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const rotationPromise = db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
         const getPromise = db.getSigningKey('addr1' as ContractAddress);
 
@@ -2318,10 +2250,7 @@ describe('Level Private State Provider', (): void => {
         const db = levelPrivateStateProvider<string, string>(config);
         await db.setSigningKey('addr1' as ContractAddress, signingKey1);
 
-        const rotationPromise = db.changeSigningKeysPassword(
-          () => OLD_PASSWORD,
-          () => NEW_PASSWORD
-        );
+        const rotationPromise = db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD);
         currentPassword = NEW_PASSWORD;
         const setPromise = db.setSigningKey('addr2' as ContractAddress, signingKey2);
 
@@ -2354,11 +2283,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key5', 'value5');
 
         await expect(
-          db.changePassword(
-            () => OLD_PASSWORD,
-            () => NEW_PASSWORD,
-            { maxEntries: 3 }
-          )
+          db.changePassword(() => OLD_PASSWORD, () => NEW_PASSWORD, { maxEntries: 3 })
         ).rejects.toThrow(/exceeds maximum allowed/);
 
         const value = await db.get('key1');
@@ -2381,11 +2306,7 @@ describe('Level Private State Provider', (): void => {
         await db.setSigningKey('addr5' as ContractAddress, sampleSigningKey());
 
         await expect(
-          db.changeSigningKeysPassword(
-            () => OLD_PASSWORD,
-            () => NEW_PASSWORD,
-            { maxEntries: 3 }
-          )
+          db.changeSigningKeysPassword(() => OLD_PASSWORD, () => NEW_PASSWORD, { maxEntries: 3 })
         ).rejects.toThrow(/exceeds maximum allowed/);
 
         const key = await db.getSigningKey('addr1' as ContractAddress);
@@ -2406,10 +2327,7 @@ describe('Level Private State Provider', (): void => {
         await db.set('key1', 'value1');
 
         await expect(
-          db.changePassword(
-            () => 'Wrong-Password-88!',
-            () => NEW_PASSWORD
-          )
+          db.changePassword(() => 'Wrong-Password-88!', () => NEW_PASSWORD)
         ).rejects.toThrow(/incorrect|mismatch|decrypt/i);
 
         const value = await db.get('key1');
@@ -2428,10 +2346,7 @@ describe('Level Private State Provider', (): void => {
         await db.setSigningKey('addr1' as ContractAddress, signingKey);
 
         await expect(
-          db.changeSigningKeysPassword(
-            () => 'Wrong-Password-88!',
-            () => NEW_PASSWORD
-          )
+          db.changeSigningKeysPassword(() => 'Wrong-Password-88!', () => NEW_PASSWORD)
         ).rejects.toThrow(/incorrect|mismatch|decrypt/i);
 
         const key = await db.getSigningKey('addr1' as ContractAddress);
@@ -2864,7 +2779,7 @@ describe('Level Private State Provider', (): void => {
       const db = levelPrivateStateProvider<PID, PS>({
         ...testConfig,
         midnightDbName: FACTORY_DB_NAME,
-        levelFactory: factory
+        levelFactory: factory,
       });
       db.setContractAddress(TEST_CONTRACT_ADDRESS);
 
@@ -2879,7 +2794,7 @@ describe('Level Private State Provider', (): void => {
       const db = levelPrivateStateProvider<PID, PS>({
         ...testConfig,
         midnightDbName: FACTORY_DB_NAME,
-        levelFactory: createLevel
+        levelFactory: createLevel,
       });
       db.setContractAddress(TEST_CONTRACT_ADDRESS);
 
@@ -2896,7 +2811,7 @@ describe('Level Private State Provider', (): void => {
         await migrateToAccountScoped({
           accountId: TEST_ACCOUNT_ID,
           midnightDbName: migrationDbName,
-          levelFactory: factory
+          levelFactory: factory,
         });
 
         expect(factory).toHaveBeenCalled();
@@ -2907,3 +2822,4 @@ describe('Level Private State Provider', (): void => {
     });
   });
 });
+

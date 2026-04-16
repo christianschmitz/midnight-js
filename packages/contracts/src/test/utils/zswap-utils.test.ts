@@ -976,7 +976,6 @@ describe('Zswap utilities', () => {
       );
       expect(resultsByCpk.get(walletCpk)).toBe(parseEncPublicKeyToHex(walletEpk, getNetworkId()));
       expect(resultsByCpk.get(SHIELDED_BURN_COIN_PUBLIC_KEY)).toBe(BURN_ENCRYPTION_PUBLIC_KEY);
-      expect(resultsByCpk.get(walletCpk)).not.toBe(resultsByCpk.get(SHIELDED_BURN_COIN_PUBLIC_KEY));
     });
 
     test('throws when any non-contract recipient is unresolvable even if other recipients succeed', () => {
