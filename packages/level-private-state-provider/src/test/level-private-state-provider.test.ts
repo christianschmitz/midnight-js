@@ -1684,7 +1684,7 @@ describe('Level Private State Provider', (): void => {
         await db.invalidateEncryptionCache();
         await db.get('key');
 
-        expect(createSpy.mock.calls.length).toBeGreaterThan(callsBeforeInvalidate);
+        expect(createSpy.mock.calls.length).toBe(callsBeforeInvalidate + 1);
       } finally {
         createSpy.mockRestore();
       }

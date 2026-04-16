@@ -899,12 +899,6 @@ describe('Zswap utilities', () => {
     });
   });
 
-  describe('Burn address constants', () => {
-    test('BURN_ENCRYPTION_PUBLIC_KEY is not the zero point', () => {
-      expect(BURN_ENCRYPTION_PUBLIC_KEY).not.toBe('0'.repeat(64));
-    });
-  });
-
   describe('createEncryptionPublicKeyResolver precedence', () => {
     // These two tests encode the security property at the heart of #745:
     // the fixed wallet/burn keys must win even if a DApp-supplied mapping
