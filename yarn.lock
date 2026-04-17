@@ -1879,6 +1879,7 @@ __metadata:
     "@types/node": "npm:^24.0.0"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^6.0.2"
+    vitest: "npm:^4.1.2"
   bin:
     fetch-compactc: dist/fetch-compact.mjs
     run-compactc: dist/run-compactc.cjs
@@ -2053,6 +2054,8 @@ __metadata:
     "@midnight-ntwrk/onchain-runtime-v3": "npm:3.0.0"
     "@midnight-ntwrk/platform-js": "npm:2.2.4"
     "@rollup/plugin-typescript": "npm:^12.3.0"
+    "@vitest/coverage-v8": "npm:^4.1.2"
+    eslint: "npm:^10.1.0"
     rollup: "npm:^4.60.1"
     rollup-plugin-dts: "npm:^6.4.1"
     typescript: "npm:^6.0.2"
