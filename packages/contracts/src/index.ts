@@ -95,8 +95,10 @@ export {
   CallTxOptionsWithPrivateStateId,
   createUnprovenCallTx,
   createUnprovenCallTxFromInitialStates,
+  createUnprovenCallTxFromInitialStatesWithZswapLocalState,
   UnprovenCallTxProvidersBase,
-  UnprovenCallTxProvidersWithPrivateState
+  UnprovenCallTxProvidersWithPrivateState,
+  UnsubmittedCallTxDataWithZswapLocalState
 } from './unproven-call-tx';
 export {
   createUnprovenDeployTx,
