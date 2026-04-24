@@ -16,8 +16,8 @@
 import { getNetworkId } from '@midnight-ntwrk/midnight-js-network-id';
 import { ContractExecutable } from '@midnight-ntwrk/midnight-js-protocol/compact-js';
 import { type Contract, ProvableCircuitId } from '@midnight-ntwrk/midnight-js-protocol/compact-js/effect/Contract';
-import { type CoinPublicKey, type ContractState } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
-import { type EncPublicKey, type LedgerParameters, type ZswapChainState } from '@midnight-ntwrk/midnight-js-protocol/ledger';
+import { type CoinPublicKey, type ContractState, type ZswapLocalState } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
+import { type EncPublicKey, type LedgerParameters, type QualifiedShieldedCoinInfo, type ZswapChainState } from '@midnight-ntwrk/midnight-js-protocol/ledger';
 import { ContractAddress } from '@midnight-ntwrk/midnight-js-protocol/platform-js/effect/ContractAddress';
 import { exitResultOrError, makeContractExecutableRuntime, type PrivateStateId, type ZKConfigProvider } from '@midnight-ntwrk/midnight-js-types';
 import { assertDefined, assertIsContractAddress, parseCoinPublicKeyToHex } from '@midnight-ntwrk/midnight-js-utils';
@@ -34,7 +34,57 @@ import { type ContractStates, getPublicStates, getStates, type PublicContractSta
 import * as Transaction from './internal/transaction';
 import { type TransactionContext } from './transaction';
 import type { UnsubmittedCallTxData } from './tx-model';
-import { createUnprovenLedgerCallTx, encryptionPublicKeyResolverForZswapState, zswapStateToNewCoins } from './utils';
+import {
+  createUnprovenLedgerCallTx,
+  createZswapOutput,
+  encryptionPublicKeyForZswapState,
+  encryptionPublicKeyResolverForZswapState,
+  zswapStateToNewCoins
+} from './utils';
+
+type MergeMetadataPayload = {
+  readonly contractOwnedOutputCoinsByCommitment: ReadonlyMap<string, QualifiedShieldedCoinInfo>;
+};
+
+const MergeMetadata = Symbol.for('@midnight-ntwrk/midnight-js-contracts#MergeMetadata');
+
+const contractOwnedOutputCoinsByCommitment = (
+  zswapLocalState: ZswapLocalState,
+  walletEncryptionPublicKey: EncPublicKey
+): ReadonlyMap<string, QualifiedShieldedCoinInfo> => {
+  const commitments = new Map<string, QualifiedShieldedCoinInfo>();
+  const encryptionPublicKeyResolver = () => walletEncryptionPublicKey;
+
+  zswapLocalState.outputs.forEach((output) => {
+    if (output.recipient.is_left) {
+      return;
+    }
+
+    const unprovenOutput = createZswapOutput(output, encryptionPublicKeyResolver);
+    commitments.set(unprovenOutput.commitment, {
+      ...output.coinInfo,
+      // Placeholder only: merge metadata is keyed by commitment, not by a real Merkle position.
+      mt_index: 0n
+    });
+  });
+
+  return commitments;
+};
+
+const attachMergeMetadata = <C extends Contract.Any, PCK extends Contract.ProvableCircuitId<C>>(
+  callTxData: UnsubmittedCallTxData<C, PCK>,
+  zswapLocalState: ZswapLocalState,
+  walletEncryptionPublicKey: EncPublicKey
+): UnsubmittedCallTxData<C, PCK> => {
+  const privateData = callTxData.private as typeof callTxData.private & Record<symbol, MergeMetadataPayload>;
+  privateData[MergeMetadata] = {
+    contractOwnedOutputCoinsByCommitment: contractOwnedOutputCoinsByCommitment(
+      zswapLocalState,
+      walletEncryptionPublicKey
+    )
+  };
+  return callTxData;
+};
 
 export function createUnprovenCallTxFromInitialStates<C extends Contract<undefined>, PCK extends Contract.ProvableCircuitId<C>>(
   zkConfigProvider: ZKConfigProvider<string>,
@@ -105,7 +155,19 @@ export async function createUnprovenCallTxFromInitialStates<C extends Contract.A
       }
     } = exitResultOrError(exitResult)
 
-    return {
+    const encryptionPublicKeyResolver = encryptionPublicKeyResolverForZswapState(
+      zswapLocalState,
+      options.coinPublicKey,
+      walletEncryptionPublicKey,
+      options.additionalCoinEncPublicKeyMappings
+    );
+    const walletEncryptionPublicKeyLocal = encryptionPublicKeyForZswapState(
+      zswapLocalState,
+      options.coinPublicKey,
+      walletEncryptionPublicKey
+    );
+
+    const callTxData = {
       public: {
         nextContractState: contractState,
         partitionedTranscript,
@@ -128,12 +190,8 @@ export async function createUnprovenCallTxFromInitialStates<C extends Contract.A
           input,
           output,
           zswapLocalState,
-          encryptionPublicKeyResolverForZswapState(
-            zswapLocalState,
-            options.coinPublicKey,
-            walletEncryptionPublicKey,
-            options.additionalCoinEncPublicKeyMappings
-          )
+          encryptionPublicKeyResolver,
+          options.communicationCommitmentRand
         ),
         newCoins: zswapStateToNewCoins(
           parseCoinPublicKeyToHex(coinPublicKey, getNetworkId()),
@@ -141,6 +199,8 @@ export async function createUnprovenCallTxFromInitialStates<C extends Contract.A
         )
       }
     };
+
+    return attachMergeMetadata(callTxData, zswapLocalState, walletEncryptionPublicKeyLocal);
   } catch (error: unknown) {
     if (!isEffectContractError(error) || error._tag !== 'ContractRuntimeError') throw error;
     if (error.cause.name !== 'CompactError') throw error;
@@ -188,7 +248,8 @@ const createCallOptions = <C extends Contract.Any, PCK extends Contract.Provable
     additionalCoinEncPublicKeyMappings: callTxOptions.additionalCoinEncPublicKeyMappings,
     compiledContract: callTxOptions.compiledContract,
     contractAddress: callTxOptions.contractAddress,
-    circuitId: callTxOptions.circuitId
+    circuitId: callTxOptions.circuitId,
+    communicationCommitmentRand: callTxOptions.communicationCommitmentRand
   };
   const callOptionsWithArguments =
     'args' in callTxOptions

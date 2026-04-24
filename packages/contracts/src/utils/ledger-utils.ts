@@ -26,6 +26,7 @@ import {
   type ZswapLocalState} from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
 import {
   ChargedState,
+  type CommunicationCommitmentRand,
   communicationCommitmentRandomness,
   ContractCallPrototype,
   ContractDeploy,
@@ -116,7 +117,8 @@ export const createUnprovenLedgerCallTx = (
   input: AlignedValue,
   output: AlignedValue,
   nextZswapLocalState: ZswapLocalState,
-  encryptionPublicKey: EncPublicKey | EncryptionPublicKeyResolver
+  encryptionPublicKey: EncPublicKey | EncryptionPublicKeyResolver,
+  communicationCommitmentRand?: CommunicationCommitmentRand
 ): UnprovenTransaction => {
   const op = toLedgerContractState(initialContractState).operation(circuitId);
   assertDefined(op, `Operation '${circuitId}' is undefined for contract state ${initialContractState.toString(false)}`);
@@ -131,7 +133,7 @@ export const createUnprovenLedgerCallTx = (
       privateTranscriptOutputs,
       input,
       output,
-      communicationCommitmentRandomness(),
+      communicationCommitmentRand ?? communicationCommitmentRandomness(),
       circuitId
     )
   );

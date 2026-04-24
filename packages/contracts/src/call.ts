@@ -25,6 +25,7 @@ import {
   type ZswapLocalState
 } from '@midnight-ntwrk/midnight-js-protocol/compact-runtime';
 import {
+  type CommunicationCommitmentRand,
   type EncPublicKey,
   type LedgerParameters,
   type PartitionedTranscript,
@@ -54,6 +55,10 @@ export type CallOptionsBase<C extends Contract.Any, PCK extends Contract.Provabl
    * The address of the contract being executed.
    */
   readonly contractAddress: ContractAddress;
+  /**
+   * Optional override for the call communication commitment randomness.
+   */
+  readonly communicationCommitmentRand?: CommunicationCommitmentRand;
 };
 
 /**
